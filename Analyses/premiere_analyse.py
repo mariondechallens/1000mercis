@@ -6,9 +6,8 @@ Created on Sat Nov  3 10:03:36 2018
 """
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import statsmodels.tsa.api as smt
+from statsmodels.tsa.seasonal import seasonal_decompose
 #import dateutil
 
 #import data
@@ -80,17 +79,14 @@ rolling_mean(y) #regarder la moyenne flottante et l'écart type
 plot_rolling_average(y)
 
 y2 = pd.Series.to_frame(y)
-effet_mensuel(y2)
-
-y2 = pd.Series.to_frame(y)
-effet_mensuel2(y2)
+effet_journalier(y2) #regarder par jour
 
 
 # multiplicative and additive seasonal decomposition
-decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='multiplicative')
+decomp = seasonal_decompose(y, model='multiplicative')
 decomp.plot();
 plt.show()
 
-decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='additive')
+decomp = seasonal_decompose(y, model='additive')
 decomp.plot();
 plt.show()

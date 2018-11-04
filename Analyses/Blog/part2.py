@@ -81,48 +81,30 @@ def plot_rolling_average(y, window=12):
 # the time under the control of an explicit format string
 # '%b' extracts the month in locale's abbreviated name from the index
 #df = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Codes/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
-def effet_mensuel(df):
+def effet_journalier(df):
+    df['Day'] = df.index.day
     df['Month'] = df.index.strftime('%b')
-    df['Year'] = df.index.year
- 
-# create nice axes names
-    month_names = pd.date_range(start='1949-01-01', periods=12, freq='MS').strftime('%b')
- 
-# reshape data using 'Year' as index and 'Month' as column
-    df_piv_line = df.pivot(index = 'Month', columns='Year', values='is_conv')
-    df_piv_line = df_piv_line.reindex(index=month_names)
+    
+# reshape data pour plot
+    df_piv_line = df.pivot(index = 'Day', columns='Month', values='is_conv')
  
 # create line plot
     df_piv_line.plot(colormap='jet')
-    plt.title('Seasonal Effect per Month', fontsize=24)
+    plt.title('Seasonal Effect per Day', fontsize=24)
     plt.ylabel('Taux moyen journalier')
     plt.legend(loc='best', bbox_to_anchor=(1.0, 0.5))
     plt.show()
 
-# create new columns to DataFrame by extracting a string representing 
-# the time under the control of an explicit format string
-# '%b' extracts the month in locale's abbreviated name from the index
-#df = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
+# reshape date pour boxplot
+    df_piv_box = df.pivot(index='Month', columns='Day', values='is_conv')
 
-def effet_mensuel2(df):
-    df['Month'] = df.index.strftime('%b')
-    df['Year'] = df.index.year
- 
-# create nice axes names
-    month_names = pd.date_range(start='1949-01-01', periods=12, freq='MS').strftime('%b')
- 
-# reshape date
-    df_piv_box = df.pivot(index='Year', columns='Month', values='is_conv')
- 
-# reindex pivot table with 'month_names'
-    df_piv_box = df_piv_box.reindex(columns=month_names)
  
 # create a box plot
     fig, ax = plt.subplots();
     df_piv_box.plot(ax=ax, kind='box');
-    ax.set_title('Seasonal Effect per Month', fontsize=24);
-    ax.set_xlabel('Month');
-    ax.set_ylabel('Passengers');
+    ax.set_title('Seasonal Effect per Day', fontsize=24);
+    ax.set_xlabel('Day');
+    ax.set_ylabel('Taux moyen journalier');
     ax.xaxis.set_ticks_position('bottom');
     fig.tight_layout();
     plt.show()
