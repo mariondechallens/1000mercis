@@ -39,6 +39,9 @@ def explorer(data):
 #moyenne des taux de conversion par jour
     
 dataj = data
+id(data) == id(dataj)
+dataj['impression_day'] = np.zeros(len(dataj))
+id(data) == id(dataj)
 for i in range(len(dataj)): #ne considerer que les jours
     dataj['impression_date'][i] = dataj['impression_date'][i][0:10]
     
