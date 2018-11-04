@@ -20,6 +20,8 @@ data = pd.read_hdf(folder + annonceur + '.hdf', key=campagne)
 
 #convert data times to date times
 #data['impression_date'] = data['impression_date'].apply(dateutil.parser.parse, dayfirst=True)
+data['impression_date'] = pd.to_datetime(data['impression_date'])
+
 #exploration des données
 def explorer(data):
     print('Début')
@@ -37,25 +39,19 @@ def explorer(data):
     
 
 #moyenne des taux de conversion par jour
-    
-dataj = data
-id(data) == id(dataj)
-dataj['impression_day'] = np.zeros(len(dataj))
-id(data) == id(dataj)
-for i in range(len(dataj)): #ne considerer que les jours
-    dataj['impression_date'][i] = dataj['impression_date'][i][0:10]
-    
-    
-
+     
 dataA = data.loc[data['group']=="A",:]
-dataA = dataA.groupby('impression_date')[['view','is_conv']].mean()
+dataA = dataA.groupby(by = dataA['impression_date'].dt.date)[['view','is_conv']].mean()
 
 dataB = data.loc[data['group']=="B",:]
-dataB = dataB.groupby('impression_date')[['view','is_conv']].mean()
+dataB = dataB.groupby(by = dataB['impression_date'].dt.date)[['view','is_conv']].mean()
 
+"""
 dataA['is_conv'].value_counts().plot.pie()
 dataA['view'].value_counts().plot.pie()
 
+dataB['is_conv'].value_counts().plot.pie()
+dataB['view'].value_counts().plot.pie() """
 
 #histogramme  
 dataA.hist(column='is_conv')
@@ -72,3 +68,7 @@ dataA['is_conv'].plot.kde()
 #diagramme à secteurs
 data['group'].value_counts().plot.pie()
 
+#part 1 blog
+y = dataA['is_conv']
+corr(y)
+ts_plot(y)
