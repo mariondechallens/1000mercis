@@ -16,7 +16,7 @@ import statsmodels.api as sm
 import seaborn as sns
 # import passenger data set
 #data = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Codes/data_passengers.csv',sep=';',header=0)
-print(data.head())
+#print(data.head())
 
 def corr(data) :
 # build scatterplot
@@ -81,9 +81,10 @@ def ts_plot(y, lags=None, title=''):
     return
 
 np.random.seed(1)
- 
+
+""" 
 # simulate discrete Gaussian white noise N(0, 1)
 e = np.random.normal(size=1000)
 #e = np.random.standard_t(size=1000, df=1)
 
-ts_plot(e, lags=30, title='white_noise')
+ts_plot(e, lags=30, title='white_noise') """

@@ -69,6 +69,28 @@ dataA['is_conv'].plot.kde()
 data['group'].value_counts().plot.pie()
 
 #part 1 blog
+exec("C:/Users/Admin/Documents/GitHub/1000mercis/Analyses/Blog/part1.py")
 y = dataA['is_conv']
-corr(y)
-ts_plot(y)
+y.index = pd.to_datetime(y.index)
+corr(y) ## scatter plots pour la corrélation
+ts_plot(y) ##analyse classique d'une ST (ACF, PACF, QQ et histo)
+
+#part 2 blog
+rolling_mean(y) #regarder la moyenne flottante et l'écart type
+plot_rolling_average(y)
+
+y2 = pd.Series.to_frame(y)
+effet_mensuel(y2)
+
+y2 = pd.Series.to_frame(y)
+effet_mensuel2(y2)
+
+
+# multiplicative and additive seasonal decomposition
+decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='multiplicative')
+decomp.plot();
+plt.show()
+
+decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='additive')
+decomp.plot();
+plt.show()
