@@ -24,8 +24,6 @@ data = pd.read_hdf(folder + annonceur + '.hdf', key=campagne)
 #convert data times to date times
 #data['impression_date'] = data['impression_date'].apply(dateutil.parser.parse, dayfirst=True)
 
-
-#exploration des données
 def explorer(data):
     print('Début')
     print(data.head()) 
@@ -39,6 +37,12 @@ def explorer(data):
     print(data.info())
     print('Description')
     print(data.describe())
+    #histogramme 
+    data.hist(column='is_conv',by='group')
+#comparaison des distributions avec un boxplot 
+    data.boxplot(column='is_conv',by='group')
+#diagramme à secteurs
+    data['group'].value_counts().plot.pie()
     
 def preparer(data):
     print('Conversion des index en dates')
@@ -58,14 +62,7 @@ dataA['view'].value_counts().plot.pie()
 dataB['is_conv'].value_counts().plot.pie()
 dataB['view'].value_counts().plot.pie() """
 
-#histogramme 
-data.hist(column='is_conv',by='group')
 
-#comparaison des distributions avec un boxplot 
-data.boxplot(column='is_conv',by='group')
-
-#diagramme à secteurs
-data['group'].value_counts().plot.pie()
 
 def analyser(data):
     print('Histogramme')
@@ -130,6 +127,8 @@ def analyser(data):
     print('Différencier le logarithme deux fois')
     y_log_diff2 = np.log(y).diff().diff(12).dropna()
     ts_diagnostics(y_log_diff2, lags=30)
-    
+
+preparer(data) 
+explorer(data)  
 analyser(dataA)
 analyser(dataB)
