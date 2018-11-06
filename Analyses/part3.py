@@ -30,7 +30,7 @@ def adf_test(y):
 # apply the function to the time series
 #adf_test(y)
 
-def ts_diagnostics(y, lags=None, title='', filename=''):
+def ts_diagnostics(y, lags=None, title='Taux de conversion'):
     '''
     Calculate acf, pacf, qq plot and Augmented Dickey Fuller test for a given time series
     '''
@@ -68,7 +68,6 @@ def ts_diagnostics(y, lags=None, title='', filename=''):
     y.plot(ax=hist_ax, kind='hist', bins=25);
     hist_ax.set_title('Histogram');
     plt.tight_layout();
-    plt.savefig('./img/{}.png'.format(filename))
     plt.show()
     
     # perform Augmented Dickey Fuller test
@@ -85,7 +84,7 @@ def ts_diagnostics(y, lags=None, title='', filename=''):
 y_diff = np.diff(y)
  
 # compute time series diagnostics
-ts_diagnostics(y_diff, lags=30, title='International Airline Passengers diff', filename='adf_diff')
+ts_diagnostics(y_diff, lags=30)
 adf_test(y_diff)
 
 
@@ -93,20 +92,20 @@ adf_test(y_diff)
 y_log = np.log(y)
  
 # compute time series diagnostics
-ts_diagnostics(y_log, lags=30, title='International Airline Passengers log', filename='adf_log')
+ts_diagnostics(y_log, lags=30)
 adf_test(y_log)
 
  #log difference time series
 y_log_diff = np.log(y).diff().dropna()
  
 # compute time series diagnostics
-ts_diagnostics(y_log_diff, lags=30, title='International Airline Passengers log', filename='adf_log_diff')
+ts_diagnostics(y_log_diff, lags=30)
 adf_test(y_log_diff)
 
-# log difference time series
+# log difference time series *2
 y_log_diff2 = np.log(y).diff().diff(12).dropna()
  
 # compute time series diagnostics
-ts_diagnostics(y_log_diff2, lags=30, title='International Airline Passengers log diff2', filename='adf_log_diff2')
+ts_diagnostics(y_log_diff2, lags=30)
 adf_test(y_log_diff2)
 """
