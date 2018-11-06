@@ -68,7 +68,7 @@ dataA['is_conv'].plot.kde()
 data['group'].value_counts().plot.pie()
 
 #part 1 blog
-exec("C:/Users/Admin/Documents/GitHub/1000mercis/Analyses/Blog/part1.py")
+from part1.py import*
 y = dataA['is_conv']
 y.index = pd.to_datetime(y.index)
 corr(y) ## scatter plots pour la corrélation
