@@ -13,10 +13,10 @@ from statsmodels.tsa.stattools import adfuller, kpss
 import statsmodels.tsa.api as smt
 import statsmodels.api as sm
 
-data = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
+#data = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
 
 # create Series object
-y = data['n_passengers']
+#y = data['n_passengers']
 
 def adf_test(y):
     # perform Augmented Dickey Fuller test
@@ -28,7 +28,7 @@ def adf_test(y):
     print(dfoutput)
  
 # apply the function to the time series
-adf_test(y)
+#adf_test(y)
 
 def ts_diagnostics(y, lags=None, title='', filename=''):
     '''
@@ -79,6 +79,8 @@ def ts_diagnostics(y, lags=None, title='', filename=''):
         dfoutput['Critical Value (%s)'%key] = value
     print(dfoutput)
     return
+
+"""
 # difference time series
 y_diff = np.diff(y)
  
@@ -107,3 +109,4 @@ y_log_diff2 = np.log(y).diff().diff(12).dropna()
 # compute time series diagnostics
 ts_diagnostics(y_log_diff2, lags=30, title='International Airline Passengers log diff2', filename='adf_log_diff2')
 adf_test(y_log_diff2)
+"""

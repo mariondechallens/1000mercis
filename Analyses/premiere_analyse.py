@@ -8,6 +8,10 @@ Created on Sat Nov  3 10:03:36 2018
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
+#parties du blog
+from part1 import *
+from part2 import *
+from part3 import *
 #import dateutil
 
 #import data
@@ -67,8 +71,6 @@ dataA['is_conv'].plot.kde()
 #diagramme à secteurs
 data['group'].value_counts().plot.pie()
 
-#part 1 blog
-from part1.py import*
 y = dataA['is_conv']
 y.index = pd.to_datetime(y.index)
 corr(y) ## scatter plots pour la corrélation
@@ -83,10 +85,16 @@ effet_journalier(y2) #regarder par jour
 
 
 # multiplicative and additive seasonal decomposition
-decomp = seasonal_decompose(y, model='multiplicative')
+
+##problème de fréquence !!
+decomp = seasonal_decompose(y, model='multiplicative',freq = 2)
 decomp.plot();
 plt.show()
 
-decomp = seasonal_decompose(y, model='additive')
+decomp = seasonal_decompose(y, model='additive',freq = 30)
 decomp.plot();
 plt.show()
+
+### Part 3: test de Dickey-Fuller
+adf_test(y)
+ts_diagnostics(y)
