@@ -12,7 +12,6 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from part1 import *
 from part2 import *
 from part3 import *
-#import dateutil
 
 #import data
 folder = 'C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Données/'
@@ -37,11 +36,14 @@ def explorer(data):
     print(data.info())
     print('Description')
     print(data.describe())
-    #histogramme 
+    
+    print('Histogramme par groupe') 
     data.hist(column='is_conv',by='group')
-#comparaison des distributions avec un boxplot 
+    
+    print('Boxplot par groupe')
     data.boxplot(column='is_conv',by='group')
-#diagramme à secteurs
+    
+    print('Répartition des groupes')
     data['group'].value_counts().plot.pie()
     
 def preparer(data):
