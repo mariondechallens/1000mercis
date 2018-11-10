@@ -4,7 +4,11 @@ Descriptif succint des fichiers
 
 #### Preprocessing
 
-+ `Data Import.ipynb` : chargement des données annonceur 1 et 2, formattage sous hdf avec réduction d'utilisation de mémoire.
++ `Data Import.ipynb` : chargement des données annonceur 1 et 2, formattage sous hdf avec réduction d'utilisation de mémoire et aggrégation sous format journalier.
+
+#### Visualisation
++ `Data visualization.ipynb` : visualisations des séries temporelles journalières (taux de conversion / taux de view) aggrégés par group de test (et par view).
++ Résultats exportés du notebook précédent sur le dataset annonceur 1 et 2.
 
 #### Analyses
 
