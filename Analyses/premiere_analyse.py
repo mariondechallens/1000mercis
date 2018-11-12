@@ -19,7 +19,6 @@ annonceur = 'annonceur1/annonceur1'
 campagne = 'annonceur1_campaign1_visite_engagee'
 data = pd.read_hdf(folder + annonceur + '.hdf', key=campagne)
 
-
 #convert data times to date times
 #data['impression_date'] = data['impression_date'].apply(dateutil.parser.parse, dayfirst=True)
 
@@ -56,7 +55,8 @@ def preparer(data):
 
     dataB = data.loc[data['group']=="B",:]
     dataB = dataB.groupby(by = dataB['impression_date'].dt.date)[['view','is_conv']].mean()
-
+    
+    return dataA, dataB
 """
 dataA['is_conv'].value_counts().plot.pie()
 dataA['view'].value_counts().plot.pie()
@@ -96,11 +96,11 @@ def analyser(data):
 
 ##problème de fréquence !!
     print('Décomposition de la série de temps')
-    decomp = seasonal_decompose(y, model='multiplicative',freq=20)
+    decomp = seasonal_decompose(y, model='multiplicative',freq=1)
     decomp.plot();
     plt.show()
 
-    decomp = seasonal_decompose(y, model='additive',freq = 30)
+    decomp = seasonal_decompose(y, model='additive',freq = 1)
     decomp.plot();
     plt.show()
 
@@ -130,7 +130,7 @@ def analyser(data):
     y_log_diff2 = np.log(y).diff().diff(12).dropna()
     ts_diagnostics(y_log_diff2, lags=30)
 
-preparer(data) 
+dataA, dataB = preparer(data) 
 explorer(data)  
 analyser(dataA)
 analyser(dataB)
