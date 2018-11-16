@@ -14,7 +14,7 @@ from part2 import *
 from part3 import *
 
 #import data
-folder = 'C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Données/'
+folder = 'C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Donnees/'
 annonceur = 'annonceur1/annonceur1'
 campagne = 'annonceur1_campaign1_visite_engagee'
 data = pd.read_hdf(folder + annonceur + '.hdf', key=campagne)
@@ -129,6 +129,7 @@ def analyser(data):
     print('Différencier le logarithme deux fois')
     y_log_diff2 = np.log(y).diff().diff(12).dropna()
     ts_diagnostics(y_log_diff2, lags=30)
+
 
 dataA, dataB = preparer(data) 
 explorer(data)  
