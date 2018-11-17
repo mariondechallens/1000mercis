@@ -130,8 +130,8 @@ def analyser(data):
     y_log_diff2 = np.log(y).diff().diff(12).dropna()
     ts_diagnostics(y_log_diff2, lags=30)
 
-
+"""
 dataA, dataB = preparer(data) 
 explorer(data)  
 analyser(dataA)
-analyser(dataB)
+analyser(dataB)"""
