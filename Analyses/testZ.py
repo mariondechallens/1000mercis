@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from premiere_analyse import preparer
 import scipy.stats as st
-
+import matplotlib.pyplot as plt
 #import data
 folder = 'C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Donnees/'
 annonceur = 'annonceur1/annonceur1'
@@ -27,3 +27,14 @@ p2 = s2/len(dataB)
 
 Z = (s1-s2)/np.sqrt(s1+s2)
 Prej = 2*(1 - st.norm.cdf(Z))
+
+fig, ax = plt.subplots(figsize=(12,6))
+xA = np.linspace(s1-49, s1+50, 100)
+yA = st.binom(len(dataA), p1).pmf(xA)
+ax.bar(xA, yA, alpha=0.5)
+xB = np.linspace(s2-49, s2+50, 100)
+yB = st.binom(len(dataB), p2).pmf(xB)
+ax.bar(xB, yB, alpha=0.5)
+plt.xlabel('converted')
+plt.ylabel('probability')
+plt.title('Binomial distributions for the control (red) and test (blue) groups')
