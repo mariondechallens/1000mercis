@@ -7,7 +7,6 @@ Created on Fri Nov 16 11:08:32 2018
 
 import pandas as pd
 import numpy as np
-from premiere_analyse import preparer
 import scipy.stats as st
 import matplotlib.pyplot as plt
 import statsmodels.stats as sms
@@ -38,13 +37,9 @@ def testZ(data):
     #Z = (s1-s2)/np.sqrt(s1+s2)
     Prej = 2*(1 - st.norm.cdf(abs(Z)))
 
-    test = sms.weightstats.ztest(dataA['is_conv'],dataB['is_conv']) #ok mêmes valeurs obtenues
-    print("Z statistique: ")
-    print(test[0])
-    print("p-value: ")
-    print(test[1])
+    #test = sms.weightstats.ztest(dataA['is_conv'],dataB['is_conv']) #ok mêmes valeurs obtenues
     
-    return Z, Prej, test
+    return Z, Prej
     
 #tracé de la distribution binomiale des taux de conversion       
 def binom_distri(data):
@@ -84,3 +79,82 @@ def norm_distri(data):
 testZ(data)
 binom_distri(data)
 norm_distri(data)
+
+#lancement sur toutes les campagnes
+#annonceur 1
+ann1 = 'annonceur1/annonceur1'
+index1 = ['1_vi_2p','1_vi_e','2_vi_2p','2_vi_e','3_vi_2p',
+          '3_vi_e','4_vi_2p','4_vi_e']
+campag1 = [
+    'annonceur1_campaign1_visite_2pages',
+    'annonceur1_campaign1_visite_engagee',
+    'annonceur1_campaign2_visite_2pages',
+    'annonceur1_campaign2_visite_engagee',
+    'annonceur1_campaign3_visite_2pages',
+    'annonceur1_campaign3_visite_engagee',
+    'annonceur1_campaign4_visite_2pages',
+    'annonceur1_campaign4_visite_engagee'
+]
+A1 = pd.DataFrame(index = index1,columns = ['Z_stat','pvalue'])
+i=0
+for key1 in campag1:
+    print(key1)
+    data = pd.read_hdf(folder + ann1 + '.hdf', key=key1)
+    test = testZ(data)
+    A1['Z_stat'][index1[i]] = test[0]
+    A1['pvalue'][index1[i]] = test[1]
+    i = i + 1
+
+#annonceur 2    
+ann2 = 'annonceur2/annonceur2'
+index2 = ['1_ach','1_vi_p_pdt','1_vi_pan']
+campag2 = [
+    'annonceur2_campaign1_achat',
+    'annonceur2_campaign1_visite_page_produit',
+    'annonceur2_campaign1_visite_panier'
+]
+A2 = pd.DataFrame(index = index2,columns = ['Z_stat','pvalue'])
+i=0
+for key2 in campag2 :
+    print(key2)
+    data = pd.read_hdf(folder + ann2 + '.hdf', key=key2)
+    test = testZ(data)
+    A2['Z_stat'][index2[i]] = test[0]
+    A2['pvalue'][index2[i]] = test[1]
+    i = i + 1
+
+plt.plot(A1['Z_stat'])  
+plt.title('Z statistiques annonceur1')  
+plt.xlabel('Campagne')
+plt.ylabel('Z')
+plt.show()
+
+plt.plot(A2['Z_stat'])  
+plt.title('Z statistiques annonceur2')  
+plt.xlabel('Campagne')
+plt.ylabel('Z')
+plt.show()
+
+plt.plot(A1['pvalue'])  
+plt.title('p_valeur annonceur1')  
+plt.xlabel('Campagne')
+plt.ylabel('p')
+plt.show()
+
+plt.plot(A2['pvalue'])  
+plt.title('p_valeur annonceur2')  
+plt.xlabel('Campagne')
+plt.ylabel('p')
+plt.show()
+
+plt.plot(A1['Z_stat'],A1['pvalue'])  
+plt.title('Z statistiques et p_valeur annonceur1')  
+plt.xlabel('Z stat')
+plt.ylabel('p_valeur')
+plt.show()
+
+plt.plot(A2['Z_stat'],A2['pvalue'])  
+plt.title('Z statistiques et p_valeur annonceur2')  
+plt.xlabel('Z stat')
+plt.ylabel('p_valeur')
+plt.show()
