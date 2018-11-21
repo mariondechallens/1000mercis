@@ -71,7 +71,6 @@ dataB['view'].value_counts().plot.pie()
 
 
 def analyser(data):
-
     data['is_conv'].plot.kde()
     plt.title("Densité")
     plt.show()
@@ -116,7 +115,7 @@ def transformer(data,transfo):
     
     if transfo == "logdiff2":
         print('Différencier le logarithme deux fois')
-        y_tr = np.log(y).diff().diff(12).dropna()
+        y_tr = np.log(y).diff().diff().dropna()
         
     
     print("Analyse après transformation\n")
