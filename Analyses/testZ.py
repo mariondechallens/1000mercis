@@ -76,6 +76,7 @@ def norm_distri(data):
     plt.title('Distribution normale pour le groupe contrôle A (rouge) and le test B (bleu)')
 
 #exemple de lancement avec les données chargées
+"""
 testZ(data)
 binom_distri(data)
 norm_distri(data)
@@ -158,3 +159,5 @@ plt.title('Z statistiques et p_valeur annonceur2')
 plt.xlabel('Z stat')
 plt.ylabel('p_valeur')
 plt.show()
+
+"""

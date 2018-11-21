@@ -82,10 +82,11 @@ def analyser(data):
     corr(y) ## scatter plots pour la corrélation
     ts_plot(y) ##analyse classique d'une ST (ACF, PACF, QQ et histo)
 
+"""
 #part 2 blog
     print('Moyennes flottantes')
     rolling_mean(y) #regarder la moyenne flottante et l'écart type
-    plot_rolling_average(y)
+    plot_rolling_average(y) """
     
     print('Effet journalier')
     y2 = pd.Series.to_frame(y)
@@ -95,40 +96,43 @@ def analyser(data):
 # multiplicative and additive seasonal decomposition
 
 ##problème de fréquence !!
-    print('Décomposition de la série de temps')
+    print('Décomposition de la série de temps selon modèle multiplicatif')
     decomp = seasonal_decompose(y, model='multiplicative',freq=1)
     decomp.plot();
     plt.show()
 
+"""
     decomp = seasonal_decompose(y, model='additive',freq = 1)
     decomp.plot();
-    plt.show()
+    plt.show()"""
 
 ### Part 3: test de Dickey-Fuller
     print('Test de Dickey-Fuller')
     adf_test(y)
     ts_diagnostics(y)
 
-# difference time series
-    print('Stationnariser la série')
-    print('Différencier')
-    y_diff = np.diff(y)
-    ts_diagnostics(y_diff, lags=30)
+def transformer(data,transfo): #transfo = diff1, log, logdiff1,logdiff2
+    y = data['is_conv']
+    if transfo == "diff1":
+        print("Différencier à l'ordre 1: y_t - y_[t-1])
+        y_tr = np.diff(y)
+    
+    if transfo == "log":
+        print('Passer au logarithme')
+        y_tr = np.log(y)
+        
+    if transfo == "logdiff":
+        print('Différencier le logarithme')
+        y_tr = np.log(y).diff().dropna()
+    
+    if transfo == "logdiff2":
+        print('Différencier le logarithme deux fois')
+        y_tr = np.log(y).diff().diff(12).dropna()
+        
+    
+    print("Analyse après transformation")
+    ts_diagnostics(y_tr, lags=30)
 
-# log transform time series
-    print('Passer au logarithme')
-    y_log = np.log(y)
-    ts_diagnostics(y_log, lags=30)
-
- #log difference time series
-    print('Différencier le logarithme')
-    y_log_diff = np.log(y).diff().dropna()
-    ts_diagnostics(y_log_diff, lags=30)
-
-# log difference time series *2
-    print('Différencier le logarithme deux fois')
-    y_log_diff2 = np.log(y).diff().diff(12).dropna()
-    ts_diagnostics(y_log_diff2, lags=30)
 
 """
 dataA, dataB = preparer(data) 
