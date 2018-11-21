@@ -89,9 +89,12 @@ def analyser(data):
 
     display(Markdown("## Décomposition de la série de temps selon modèle multiplicatif"))
     print('\n')
-    decomp = seasonal_decompose(y, model='multiplicative',freq=1)
-    decomp.plot();
-    plt.show()
+    if (y > 0).all():
+        decomp = seasonal_decompose(y, model='multiplicative',freq=1)
+        decomp.plot();
+        plt.show()
+    else:
+        print('Multiplicative seasonality is not appropriate for zero and negative values')
 
     # Part 3: test de Dickey-Fuller
     display(Markdown("## Test de Dickey-Fuller"))
@@ -116,6 +119,8 @@ def transformer(data,transfo):
     if transfo == "logdiff2":
         print('Différencier le logarithme deux fois')
         y_tr = np.log(y).diff().diff().dropna()
+
+
         
     
     print("Analyse après transformation\n")
