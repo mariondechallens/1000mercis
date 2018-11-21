@@ -67,11 +67,7 @@ dataB['view'].value_counts().plot.pie() """
 
 
 
-def analyser(data):
-    data.hist(column='is_conv')
-    plt.title("Histogramme")
-    plt.show()
-    
+def analyser(data): 
     data['is_conv'].plot.kde()
     plt.title("Densité")
     plt.show()
