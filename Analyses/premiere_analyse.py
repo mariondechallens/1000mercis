@@ -8,6 +8,7 @@ Created on Sat Nov  3 10:03:36 2018
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
+import numpy as np
 #parties du blog
 from part1 import *
 from part2 import *
@@ -67,54 +68,37 @@ dataB['view'].value_counts().plot.pie() """
 
 
 def analyser(data):
-    print('Histogramme')
     data.hist(column='is_conv')
+    plt.title("Histogramme")
+    plt.show()
     
-    print('Scatter plot')
-    data.plot.scatter(x='is_conv',y='view')
-    
-    print('Densité du taux de conversion')
     data['is_conv'].plot.kde()
+    plt.title("Densité")
+    plt.show()
+    
 #part 1 du blog
-    print('Corrélations et covariances')
     y = data['is_conv']
     y.index = pd.to_datetime(y.index)
-    corr(y) ## scatter plots pour la corrélation
     ts_plot(y) ##analyse classique d'une ST (ACF, PACF, QQ et histo)
-
-"""
-#part 2 blog
-    print('Moyennes flottantes')
-    rolling_mean(y) #regarder la moyenne flottante et l'écart type
-    plot_rolling_average(y) """
     
     print('Effet journalier')
     y2 = pd.Series.to_frame(y)
     effet_journalier(y2) #regarder par jour
-
-
-# multiplicative and additive seasonal decomposition
-
-##problème de fréquence !!
+    
     print('Décomposition de la série de temps selon modèle multiplicatif')
     decomp = seasonal_decompose(y, model='multiplicative',freq=1)
     decomp.plot();
     plt.show()
 
-"""
-    decomp = seasonal_decompose(y, model='additive',freq = 1)
-    decomp.plot();
-    plt.show()"""
-
 ### Part 3: test de Dickey-Fuller
     print('Test de Dickey-Fuller')
     adf_test(y)
-    ts_diagnostics(y)
+        
 
 def transformer(data,transfo): #transfo = diff1, log, logdiff1,logdiff2
     y = data['is_conv']
     if transfo == "diff1":
-        print("Différencier à l'ordre 1: y_t - y_[t-1])
+        print("Différencier à l'ordre 1: y_t - y_[t-1]")
         y_tr = np.diff(y)
     
     if transfo == "log":
@@ -138,4 +122,7 @@ def transformer(data,transfo): #transfo = diff1, log, logdiff1,logdiff2
 dataA, dataB = preparer(data) 
 explorer(data)  
 analyser(dataA)
-analyser(dataB)"""
+analyser(dataB)
+transformer(dataA,"diff1")
+"""
+
