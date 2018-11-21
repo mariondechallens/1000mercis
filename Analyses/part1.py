@@ -14,12 +14,10 @@ import matplotlib.pyplot as plt
 import statsmodels.tsa.api as smt
 import statsmodels.api as sm
 import seaborn as sns
-# import passenger data set
-#data = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Codes/data_passengers.csv',sep=';',header=0)
-#print(data.head())
+
 
 def corr(data) :
-# build scatterplot
+    # build scatterplot
     ncols = 3
     nrows = 3
     lags = 9
@@ -43,13 +41,14 @@ def corr(data) :
     fig.tight_layout()
     plt.show()
 
+
 def ts_plot(y, lags=None, title=''):
-    '''
+    """
     Calculate acf, pacf, histogram, and qq plot for a given time series
-    '''
+    """
     # if time series is not a Series object, make it so
     if not isinstance(y, pd.Series):
-        y = pd.Series(y)
+        y = pd.Series(y, name='y')
     
     # initialize figure and axes
     fig = plt.figure(figsize=(14, 12))
@@ -62,17 +61,17 @@ def ts_plot(y, lags=None, title=''):
     
     # time series plot
     y.plot(ax=ts_ax)
-    plt.legend(loc='best')
+    ts_ax.legend(loc='best')  # plt.legend(loc='best')
     ts_ax.set_title(title);
     
     # acf and pacf
     smt.graphics.plot_acf(y, lags=lags, ax=acf_ax, alpha=0.5)
-    smt.graphics.plot_pacf(y, lags=lags, ax=pacf_ax, alpha=0.5) 
-    
+    smt.graphics.plot_pacf(y, lags=lags, ax=pacf_ax, alpha=0.5)
+
     # qq plot
     sm.qqplot(y, line='s', ax=qq_ax)
     qq_ax.set_title('Normal QQ Plot')
-    
+
     # hist plot
     y.plot(ax=hist_ax, kind='hist', bins=25);
     hist_ax.set_title('Histogram');
@@ -80,11 +79,12 @@ def ts_plot(y, lags=None, title=''):
     plt.show()
     return
 
-np.random.seed(1)
 
 """ 
+np.random.seed(1)
 # simulate discrete Gaussian white noise N(0, 1)
 e = np.random.normal(size=1000)
 #e = np.random.standard_t(size=1000, df=1)
 
-ts_plot(e, lags=30, title='white_noise') """
+ts_plot(e, lags=30, title='white_noise') 
+"""

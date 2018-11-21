@@ -11,9 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.tsa 
 
-#data = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Codes/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
-#y = data['n_passengers']
-
 # simple line plot
 def rolling_mean(y):
     plt.plot(y)
@@ -62,9 +59,9 @@ def rolling_mean(y):
     
     
 def plot_rolling_average(y, window=12):
-    '''
+    """
     Plot rolling mean and rolling standard deviation for a given time series and window
-    '''
+    """
     # calculate moving averages
     rolling_mean = y.rolling(window=window).mean()
     rolling_std = y.rolling(window=window).std()
@@ -80,26 +77,29 @@ def plot_rolling_average(y, window=12):
 # create new columns to DataFrame by extracting a string representing 
 # the time under the control of an explicit format string
 # '%b' extracts the month in locale's abbreviated name from the index
-#df = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Codes/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
+
+
 def effet_journalier(df):
+    """
+    Influence du jour du mois (1,...31) sur le taux de conversion moyen
+    """
     df['Day'] = df.index.day
     df['Month'] = df.index.strftime('%b')
     
-# reshape data pour plot
-    df_piv_line = df.pivot(index = 'Day', columns='Month', values='is_conv')
+    # reshape data pour plot
+    df_piv_line = df.pivot(index='Day', columns='Month', values='is_conv')
  
-# create line plot
+    # create line plot
     df_piv_line.plot(colormap='jet')
     plt.title('Seasonal Effect per Day', fontsize=24)
     plt.ylabel('Taux moyen journalier')
     plt.legend(loc='best', bbox_to_anchor=(1.0, 0.5))
     plt.show()
 
-# reshape date pour boxplot
+    # reshape date pour boxplot
     df_piv_box = df.pivot(index='Month', columns='Day', values='is_conv')
 
- 
-# create a box plot
+    # create a box plot
     fig, ax = plt.subplots();
     df_piv_box.plot(ax=ax, kind='box');
     ax.set_title('Seasonal Effect per Day', fontsize=24);
@@ -111,10 +111,13 @@ def effet_journalier(df):
 
 # multiplicative seasonal decomposition
 
-"""decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='multiplicative')
+
+"""
+decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='multiplicative')
 decomp.plot();
 plt.show()
 
 decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='additive')
 decomp.plot();
-plt.show()"""
+plt.show()
+"""

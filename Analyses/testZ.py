@@ -12,11 +12,6 @@ import matplotlib.pyplot as plt
 import statsmodels.stats as sms
 #source: https://towardsdatascience.com/the-math-behind-a-b-testing-with-example-code-part-1-of-2-7be752e1d06f
 
-#import data
-folder = 'C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Donnees/'
-annonceur = 'annonceur1/annonceur1'
-campagne = 'annonceur1_campaign1_visite_engagee'
-data = pd.read_hdf(folder + annonceur + '.hdf', key=campagne)
 
 def proportions(data):
     dataA = data.loc[data['group']=="A",:]

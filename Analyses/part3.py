@@ -12,34 +12,36 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.stattools import adfuller, kpss
 import statsmodels.tsa.api as smt
 import statsmodels.api as sm
+from IPython.display import display, Markdown
 
-#data = pd.read_csv('C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/data_passengers.csv', header=0, index_col=0, parse_dates=True, sep=';')
-
-# create Series object
-#y = data['n_passengers']
 
 def adf_test(y):
-    # perform Augmented Dickey Fuller test
-    print('Results of Augmented Dickey-Fuller test:')
+    """
+    Perform Augmented Dickey Fuller test
+    """
     dftest = adfuller(y, autolag='AIC')
     dfoutput = pd.Series(dftest[0:4], index=['test statistic', 'p-value', '# of lags', '# of observations'])
     for key, value in dftest[4].items():
         dfoutput['Critical Value ({})'.format(key)] = value
-    print(dfoutput)
- 
-# apply the function to the time series
-#adf_test(y)
+    display(dfoutput.rename('Results of Augmented Dickey-Fuller test:').to_frame())
 
-def ts_diagnostics(y, lags=None, title='Taux de conversion'):
-    '''
+
+"""
+# apply the function to the time series
+adf_test(y)
+"""
+
+
+def ts_diagnostics(y, lags=None, title='Taux de conversion', window=5):
+    """
     Calculate acf, pacf, qq plot and Augmented Dickey Fuller test for a given time series
-    '''
+    """
     if not isinstance(y, pd.Series):
-        y = pd.Series(y)
+        y = pd.Series(y, name='y')
         
     # weekly moving averages (5 day window because of workdays)
-    rolling_mean = y.rolling(window=12).mean()
-    rolling_std = y.rolling(window=12).std()
+    rolling_mean = y.rolling(window=window).mean()
+    rolling_std = y.rolling(window=window).std()
     
     fig = plt.figure(figsize=(14, 12))
     layout = (3, 2)
@@ -50,10 +52,10 @@ def ts_diagnostics(y, lags=None, title='Taux de conversion'):
     hist_ax = plt.subplot2grid(layout, (2, 1))
     
     # time series plot
-    y.plot(ax=ts_ax)
-    rolling_mean.plot(ax=ts_ax, color='crimson');
-    rolling_std.plot(ax=ts_ax, color='darkslateblue');
-    plt.legend(loc='best')
+    y.plot(ax=ts_ax, label=y.name)
+    rolling_mean.plot(ax=ts_ax, color='crimson', label=f'roll_mean ({window} days)');
+    rolling_std.plot(ax=ts_ax, color='darkslateblue', label=f'roll_std ({window} days)');
+    ts_ax.legend(loc='best')
     ts_ax.set_title(title, fontsize=24);
     
     # acf and pacf
@@ -71,13 +73,13 @@ def ts_diagnostics(y, lags=None, title='Taux de conversion'):
     plt.show()
     
     # perform Augmented Dickey Fuller test
-    print('Results of Dickey-Fuller test:')
     dftest = adfuller(y, autolag='AIC')
     dfoutput = pd.Series(dftest[0:4], index=['test statistic', 'p-value', '# of lags', '# of observations'])
     for key, value in dftest[4].items():
         dfoutput['Critical Value (%s)'%key] = value
-    print(dfoutput)
+    display(dfoutput.rename('Results of Augmented Dickey-Fuller test:').to_frame())
     return
+
 
 """
 # difference time series

@@ -13,17 +13,14 @@ import numpy as np
 from part1 import *
 from part2 import *
 from part3 import *
+from IPython.display import display, Markdown
 
-#import data
-folder = 'C:/Users/Admin/Documents/Centrale Paris/3A/OMA/Projet/Donnees/'
-annonceur = 'annonceur1/annonceur1'
-campagne = 'annonceur1_campaign1_visite_engagee'
-data = pd.read_hdf(folder + annonceur + '.hdf', key=campagne)
-
-#convert data times to date times
-#data['impression_date'] = data['impression_date'].apply(dateutil.parser.parse, dayfirst=True)
 
 def explorer(data):
+    """
+    Informations tres generales sur un dataset
+    :param data: fichier brut d'un dataset
+    """
     print('Début')
     print(data.head()) 
     print('Taille')
@@ -38,64 +35,72 @@ def explorer(data):
     print(data.describe())
     
     print('Histogramme par groupe') 
-    data.hist(column='is_conv',by='group')
+    data.hist(column='is_conv', by='group')
     
     print('Boxplot par groupe')
-    data.boxplot(column='is_conv',by='group')
+    data.boxplot(column='is_conv', by='group')
     
     print('Répartition des groupes')
     data['group'].value_counts().plot.pie()
     
 def preparer(data):
+    """
+    :param data: fichier brut d'un dataset
+    :return: deux pd.DataFrame correspondant respectivement aux moyennes journalieres des groupes A et B
+    """
     print('Conversion des index en dates')
     data['impression_date'] = pd.to_datetime(data['impression_date'])
     
     print('Moyennes des taux par jour et séparation en deux groupes A et B')
-    dataA = data.loc[data['group']=="A",:]
-    dataA = dataA.groupby(by = dataA['impression_date'].dt.date)[['view','is_conv']].mean()
+    dataA = data.loc[data['group'] == "A", :]
+    dataA = dataA.groupby(by=dataA['impression_date'].dt.date)[['view','is_conv']].mean()
 
-    dataB = data.loc[data['group']=="B",:]
-    dataB = dataB.groupby(by = dataB['impression_date'].dt.date)[['view','is_conv']].mean()
+    dataB = data.loc[data['group'] == "B", :]
+    dataB = dataB.groupby(by=dataB['impression_date'].dt.date)[['view','is_conv']].mean()
     
     return dataA, dataB
+
+
 """
 dataA['is_conv'].value_counts().plot.pie()
 dataA['view'].value_counts().plot.pie()
 
 dataB['is_conv'].value_counts().plot.pie()
-dataB['view'].value_counts().plot.pie() """
-
+dataB['view'].value_counts().plot.pie() 
+"""
 
 
 def analyser(data):
-    data.hist(column='is_conv')
-    plt.title("Histogramme")
-    plt.show()
-    
+
     data['is_conv'].plot.kde()
     plt.title("Densité")
     plt.show()
     
-#part 1 du blog
+    # part 1 du blog
+    display(Markdown("## Analyse classique d'une ST"))
+    print('\n')
     y = data['is_conv']
     y.index = pd.to_datetime(y.index)
-    ts_plot(y) ##analyse classique d'une ST (ACF, PACF, QQ et histo)
-    
-    print('Effet journalier')
+    ts_plot(y)  # analyse classique d'une ST (ACF, PACF, QQ et histo)
+
+    display(Markdown("## Effet journalier"))
+    print('\n')
     y2 = pd.Series.to_frame(y)
-    effet_journalier(y2) #regarder par jour
-    
-    print('Décomposition de la série de temps selon modèle multiplicatif')
+    effet_journalier(y2) # regarder par jour
+
+    display(Markdown("## Décomposition de la série de temps selon modèle multiplicatif"))
+    print('\n')
     decomp = seasonal_decompose(y, model='multiplicative',freq=1)
     decomp.plot();
     plt.show()
 
-### Part 3: test de Dickey-Fuller
-    print('Test de Dickey-Fuller')
+    # Part 3: test de Dickey-Fuller
+    display(Markdown("## Test de Dickey-Fuller"))
     adf_test(y)
         
 
-def transformer(data,transfo): #transfo = diff1, log, logdiff1,logdiff2
+def transformer(data,transfo):
+    assert transfo in ["diff1", "log", "logdiff", "logdiff2"]
     y = data['is_conv']
     if transfo == "diff1":
         print("Différencier à l'ordre 1: y_t - y_[t-1]")
@@ -114,7 +119,7 @@ def transformer(data,transfo): #transfo = diff1, log, logdiff1,logdiff2
         y_tr = np.log(y).diff().diff(12).dropna()
         
     
-    print("Analyse après transformation")
+    print("Analyse après transformation\n")
     ts_diagnostics(y_tr, lags=30)
 
 
