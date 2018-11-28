@@ -35,6 +35,27 @@ def testZ(data):
     #test = sms.weightstats.ztest(dataA['is_conv'],dataB['is_conv']) #ok mêmes valeurs obtenues
     
     return Z, Prej
+
+
+def testZ_cum(data):
+    """
+    Réalisation du test Z sur 2 groupes A et B de manière cumulée (du jour 1 au jour 2, 3, ...T)
+    """
+    if "date" not in data.columns:
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
+    # comptage du nombre de donnees par groupe
+    daily = data.groupby(["date", "group", "is_conv"]).size()
+    daily = daily.rename('n').reset_index()
+    # nombre total cumule par groupe
+    n_cum = daily.groupby(['date', 'group'])['n'].sum().unstack().cumsum()
+    # nombre de succes (=1) par groupe
+    s_cum = daily.loc[daily["is_conv"] == 1].groupby(['date', 'group'])['n'].sum().unstack()
+    s_cum = s_cum.reindex(n_cum.index).fillna(0).cumsum()  # NaN quand il y a pas de conversion
+    p_cum = s_cum / n_cum
+    Z_cum = (p_cum["A"] - p_cum["B"]) / np.sqrt((p_cum * (1 - p_cum) / n_cum).sum(1))
+    P_rej = pd.Series(2 * (1 - st.norm.cdf(Z_cum.abs())), index=p_cum.index, name='P_rej')
+    return P_rej, p_cum
+
     
 #tracé de la distribution binomiale des taux de conversion       
 def binom_distri(data):
