@@ -44,12 +44,12 @@ def testZ_cum(data):
     if "date" not in data.columns:
         data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
     # comptage du nombre de donnees par groupe
-    daily = data.groupby(["date", "group", "is_conv"]).size()
-    daily = daily.rename('n').reset_index()
+    daily_size = data.groupby(["date", "group", "is_conv"]).size()
+    daily_size = daily_size.rename('n').reset_index()
     # nombre total cumule par groupe
-    n_cum = daily.groupby(['date', 'group'])['n'].sum().unstack().cumsum()
+    n_cum = daily_size.groupby(['date', 'group'])['n'].sum().unstack().cumsum()
     # nombre de succes (=1) par groupe
-    s_cum = daily.loc[daily["is_conv"] == 1].groupby(['date', 'group'])['n'].sum().unstack()
+    s_cum = daily_size.loc[daily_size["is_conv"] == 1].groupby(['date', 'group'])['n'].sum().unstack()
     s_cum = s_cum.reindex(n_cum.index).fillna(0).cumsum()  # NaN quand il y a pas de conversion
     p_cum = s_cum / n_cum
     Z_cum = (p_cum["A"] - p_cum["B"]) / np.sqrt((p_cum * (1 - p_cum) / n_cum).sum(1))
