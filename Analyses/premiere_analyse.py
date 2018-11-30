@@ -135,3 +135,30 @@ analyser(dataB)
 transformer(dataA,"diff1")
 """
 
+
+def conversion_rate_resample(data, freq):
+    """
+    A partir des donnes brutes, calculer le nombre de conversion sur une frequence donnee
+    1D : 1 jour, 2D : 2 jours
+    1W: 1 semaine
+    1M : 1 mois
+    Pour plus d'infos sur la frequence :
+    http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
+    """
+    if "date" not in data.columns:
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
+    return data.set_index('date').groupby('group').resample(freq)['is_conv'].mean().unstack(0)
+
+
+def conversion_count_resample(data, freq):
+    """
+    A partir des donnes brutes, calculer le taux de conversion sur une frequence donnee
+    1D : 1 jour, 2D : 2 jours
+    1W: 1 semaine
+    1M : 1 mois
+    Pour plus d'infos sur la frequence :
+    http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
+    """
+    if "date" not in data.columns:
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
+    return data.set_index('date').groupby('group').resample(freq)['is_conv'].sum().unstack(0)
