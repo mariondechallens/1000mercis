@@ -54,7 +54,7 @@ def testZ_cum(data):
     p_cum = s_cum / n_cum
     Z_cum = (p_cum["A"] - p_cum["B"]) / np.sqrt((p_cum * (1 - p_cum) / n_cum).sum(1))
     P_rej = pd.Series(2 * (1 - st.norm.cdf(Z_cum.abs())), index=p_cum.index, name='P_rej')
-    return P_rej, p_cum
+    return Z_cum, P_rej, p_cum
 
     
 #tracé de la distribution binomiale des taux de conversion       
