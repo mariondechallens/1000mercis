@@ -61,15 +61,6 @@ def preparer(data):
     return dataA, dataB
 
 
-"""
-dataA['is_conv'].value_counts().plot.pie()
-dataA['view'].value_counts().plot.pie()
-
-dataB['is_conv'].value_counts().plot.pie()
-dataB['view'].value_counts().plot.pie() 
-"""
-
-
 def analyser(data):
     data['is_conv'].plot.kde()
     plt.title("Densité")
@@ -126,19 +117,9 @@ def transformer(data,transfo):
     print("Analyse après transformation\n")
     ts_diagnostics(y_tr, lags=30)
 
-
-"""
-dataA, dataB = preparer(data) 
-explorer(data)  
-analyser(dataA)
-analyser(dataB)
-transformer(dataA,"diff1")
-"""
-
-
 def conversion_rate_resample(data, freq):
     """
-    A partir des donnes brutes, calculer le nombre de conversion sur une frequence donnee
+    A partir des donnes brutes, calculer le taux de conversion sur une frequence donnee
     1D : 1 jour, 2D : 2 jours
     1W: 1 semaine
     1M : 1 mois
@@ -152,7 +133,7 @@ def conversion_rate_resample(data, freq):
 
 def conversion_count_resample(data, freq):
     """
-    A partir des donnes brutes, calculer le taux de conversion sur une frequence donnee
+    A partir des donnes brutes, calculer le nombre de conversion sur une frequence donnee
     1D : 1 jour, 2D : 2 jours
     1W: 1 semaine
     1M : 1 mois
