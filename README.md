@@ -26,9 +26,9 @@ Descriptif succint des fichiers
 #### Notebooks des résultats
 + `Z test.ipynb` : Synthèse du test Z appliqué à toutes les campagnes.
 + `Annonceur1_campagne1_visite_2pages.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite 2 pages numéro 1 de l'annonceur 1.
-+ `Annonceur1_campagne1_visite_engagee.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite engagée numéro 1 de l'annonceur 1.
++ `Annonceur1_campagne1_visite_2pages_Questions.ipynb`: Analyse de la campagne suivant les questions de 1000mercis.
 + `Annonceur1_campagne2_visite_2pages.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite 2 pages numéro 2 de l'annonceur 1.
-+ `Annonceur1_campagne2_visite_engagee.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite engagée numéro 2 de l'annonceur 1.
++ `Annonceur1_campagne2_visite_2pages_Questions.ipynb`: Analyse de la campagne suivant les questions de 1000mercis.
 + `Annonceur2_campagne1_visite_achat.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite achat de l'annonceur 2
 + `Annonceur2_campagne1_visite_page_produit.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite page produit de l'annonceur 2.
 + `Annonceur2_campagne1_visite_panier.ipynb`: Résultats graphiques et numériques de l'analyse de la campagne visite panier de l'annonceur 2.
