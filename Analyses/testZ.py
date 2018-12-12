@@ -64,12 +64,12 @@ def testZ_cum_frequency(data, freq="1D"):
     """
     if "date" not in data.columns:
         data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S")
-    if pd.Timedelta("3D") > pd.Timedelta("1D"):
+    if pd.Timedelta(freq) > pd.Timedelta("1D"):
         data_grouped = data.set_index(data["date"].dt.normalize()).groupby("group")
     else:
         data_grouped = data.set_index("date").groupby("group")
     n = data_grouped.resample(freq, closed="left", label="right").size().T
-    index = (n > 0).all(axis=1)
+    index = (n > 0).any(axis=1)
     n_cum = n.loc[index].cumsum()
     s_cum = data_grouped.resample(freq, closed="left", label="right")['is_conv'].sum().unstack(0)
     s_cum = s_cum.loc[index].cumsum()
