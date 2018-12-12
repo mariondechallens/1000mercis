@@ -127,7 +127,7 @@ def conversion_rate_resample(data, freq):
     http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     """
     if "date" not in data.columns:
-        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S")
     return data.set_index('date').groupby('group').resample(freq)['is_conv'].mean().unstack(0)
 
 
@@ -141,5 +141,5 @@ def conversion_count_resample(data, freq):
     http://pandas.pydata.org/pandas-docs/stable/timeseries.html#offset-aliases
     """
     if "date" not in data.columns:
-        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S")
     return data.set_index('date').groupby('group').resample(freq)['is_conv'].sum().unstack(0)

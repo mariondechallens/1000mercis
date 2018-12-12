@@ -42,7 +42,7 @@ def testZ_cum(data):
     Réalisation du test Z sur 2 groupes A et B de manière cumulée (du jour 1 au jour 2, 3, ...T)
     """
     if "date" not in data.columns:
-        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S").dt.normalize()
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S")
     # comptage du nombre de donnees par groupe
     daily_size = data.groupby(["date", "group", "is_conv"]).size()
     daily_size = daily_size.rename('n').reset_index()
@@ -56,8 +56,62 @@ def testZ_cum(data):
     P_rej = pd.Series(2 * (1 - st.norm.cdf(Z_cum.abs())), index=p_cum.index, name='P_rej')
     return Z_cum, P_rej, p_cum
 
-    
-#tracé de la distribution binomiale des taux de conversion       
+
+def testZ_cum_frequency(data, freq="1D"):
+    """
+    Realise test Z cumule a une frequence donnee. Par exemple, si la frequence est de 3D ie 3 jours,
+    on fait un test Z avec les donnes de t0 a t2, puis de t0 a t5, puis t0 a t8 etc.
+    """
+    if "date" not in data.columns:
+        data.loc[:, "date"] = pd.to_datetime(data["impression_date"], format="%Y-%m-%d %H:%M:%S")
+    if pd.Timedelta("3D") > pd.Timedelta("1D"):
+        data_grouped = data.set_index(data["date"].dt.normalize()).groupby("group")
+    else:
+        data_grouped = data.set_index("date").groupby("group")
+    n = data_grouped.resample(freq, closed="left", label="right").size().T
+    index = (n > 0).all(axis=1)
+    n_cum = n.loc[index].cumsum()
+    s_cum = data_grouped.resample(freq, closed="left", label="right")['is_conv'].sum().unstack(0)
+    s_cum = s_cum.loc[index].cumsum()
+    p_cum = s_cum / n_cum
+    Z_cum = (p_cum["A"] - p_cum["B"]) / np.sqrt((p_cum * (1 - p_cum) / n_cum).sum(1))
+    P_rej = pd.Series(2 * (1 - st.norm.cdf(Z_cum.abs())), index=p_cum.index, name='P_rej')
+    return Z_cum, P_rej, p_cum
+
+
+def plot_testZ_cum_frequency(Z_cum, P_rej, p_cum, freq):
+    """
+    Resultats du test Z cumule a la frequence donnee.
+    """
+    plt.figure(figsize=(16, 6))
+
+    plt.subplot(1, 3, 1)
+    p_cum.plot(
+        title="Evolution du taux de conversion cumule",
+        ax=plt.gca(), marker="o", ms=4
+    )
+    plt.ylabel("Taux de conversion")
+
+    plt.subplot(1, 3, 2)
+    P_rej.plot(
+        title='Evolution de la P-valeur cumulé',
+        ax=plt.gca(), label="P-val", marker="o", ms=4
+    )
+    for threshold in [0.2, 0.1]:
+        theshold_series = pd.Series(np.full(len(P_rej), threshold), index=P_rej.index)
+        theshold_series.plot(ax=plt.gca(), label=f"threshold={threshold}")
+    plt.ylabel('P-val cumulé')
+    plt.legend()
+
+    plt.subplot(1, 3, 3)
+    Z_cum.plot(title='Evolution de la Z-valeur cumulé', ax=plt.gca(), marker="o", ms=4)
+    plt.ylabel('Z-val cumulé')
+
+    plt.suptitle(f"Z-test cumulé avec pas = {freq}")
+    plt.show();
+
+
+#tracé de la distribution binomiale des taux de conversion
 def binom_distri(data):
     dataA, dataB, n1, n2, s1, s2, p1, p2 = proportions(data)
     
