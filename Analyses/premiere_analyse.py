@@ -90,7 +90,25 @@ def analyser(data):
     # Part 3: test de Dickey-Fuller
     display(Markdown("## Test de Dickey-Fuller"))
     adf_test(y)
-        
+
+def analyserZP(y) :  ## idem que analyser mais adapté pour série des Z ou P en entrée
+    display(Markdown("## Analyse classique d'une ST"))
+    print('\n')
+    y.index = pd.to_datetime(y.index)
+    ts_plot(y)  # analyse classique d'une ST (ACF, PACF, QQ et histo)
+
+    display(Markdown("## Décomposition de la série de temps selon modèle multiplicatif"))
+    print('\n')
+    if (y > 0).all():
+        decomp = seasonal_decompose(y, model='multiplicative',freq=1)
+        decomp.plot();
+        plt.show()
+    else:
+        print('Multiplicative seasonality is not appropriate for zero and negative values')
+
+    # Part 3: test de Dickey-Fuller
+    display(Markdown("## Test de Dickey-Fuller"))
+    adf_test(y)   
 
 def transformer(data,transfo):
     assert transfo in ["diff1", "log", "logdiff", "logdiff2"]
