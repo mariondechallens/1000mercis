@@ -10,6 +10,9 @@ import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
 import statsmodels.stats as sms
+from IPython.display import display, Markdown
+from statsmodels.tsa.arima_model import ARIMA
+from pandas import DataFrame
 #source: https://towardsdatascience.com/the-math-behind-a-b-testing-with-example-code-part-1-of-2-7be752e1d06f
 
 
@@ -145,89 +148,18 @@ def norm_distri(data):
     plt.ylabel('Densité de probabilité')
     plt.title('Distribution normale pour le groupe contrôle A (rouge) and le test B (bleu)')
 
-#exemple de lancement avec les données chargées
-"""
-testZ(data)
-binom_distri(data)
-norm_distri(data)
-
-#lancement sur toutes les campagnes
-#annonceur 1
-ann1 = 'annonceur1/annonceur1'
-index1 = ['1_vi_2p','1_vi_e','2_vi_2p','2_vi_e','3_vi_2p',
-          '3_vi_e','4_vi_2p','4_vi_e']
-campag1 = [
-    'annonceur1_campaign1_visite_2pages',
-    'annonceur1_campaign1_visite_engagee',
-    'annonceur1_campaign2_visite_2pages',
-    'annonceur1_campaign2_visite_engagee',
-    'annonceur1_campaign3_visite_2pages',
-    'annonceur1_campaign3_visite_engagee',
-    'annonceur1_campaign4_visite_2pages',
-    'annonceur1_campaign4_visite_engagee'
-]
-A1 = pd.DataFrame(index = index1,columns = ['Z_stat','pvalue'])
-i=0
-for key1 in campag1:
-    print(key1)
-    data = pd.read_hdf(folder + ann1 + '.hdf', key=key1)
-    test = testZ(data)
-    A1['Z_stat'][index1[i]] = test[0]
-    A1['pvalue'][index1[i]] = test[1]
-    i = i + 1
-
-#annonceur 2    
-ann2 = 'annonceur2/annonceur2'
-index2 = ['1_ach','1_vi_p_pdt','1_vi_pan']
-campag2 = [
-    'annonceur2_campaign1_achat',
-    'annonceur2_campaign1_visite_page_produit',
-    'annonceur2_campaign1_visite_panier'
-]
-A2 = pd.DataFrame(index = index2,columns = ['Z_stat','pvalue'])
-i=0
-for key2 in campag2 :
-    print(key2)
-    data = pd.read_hdf(folder + ann2 + '.hdf', key=key2)
-    test = testZ(data)
-    A2['Z_stat'][index2[i]] = test[0]
-    A2['pvalue'][index2[i]] = test[1]
-    i = i + 1
-
-plt.plot(A1['Z_stat'])  
-plt.title('Z statistiques annonceur1')  
-plt.xlabel('Campagne')
-plt.ylabel('Z')
-plt.show()
-
-plt.plot(A2['Z_stat'])  
-plt.title('Z statistiques annonceur2')  
-plt.xlabel('Campagne')
-plt.ylabel('Z')
-plt.show()
-
-plt.plot(A1['pvalue'])  
-plt.title('p_valeur annonceur1')  
-plt.xlabel('Campagne')
-plt.ylabel('p')
-plt.show()
-
-plt.plot(A2['pvalue'])  
-plt.title('p_valeur annonceur2')  
-plt.xlabel('Campagne')
-plt.ylabel('p')
-plt.show()
-
-plt.plot(A1['Z_stat'],A1['pvalue'])  
-plt.title('Z statistiques et p_valeur annonceur1')  
-plt.xlabel('Z stat')
-plt.ylabel('p_valeur')
-plt.show()
-
-plt.plot(A2['Z_stat'],A2['pvalue'])  
-plt.title('Z statistiques et p_valeur annonceur2')  
-plt.xlabel('Z stat')
-plt.ylabel('p_valeur')
-plt.show()
-
-"""
+def testARMA(s,p,d,q):  #ttrouver un modèle ARIMA pour les données (d = ordre différenciation)
+    display(Markdown("## Fit du modèle"))
+    print('\n')
+    model = ARIMA(s, order=(p,d,q))  
+    model_fit = model.fit(disp=0)
+    print(model_fit.summary())
+    
+    display(Markdown("## Erreurs"))
+    print('\n')
+    residuals = DataFrame(model_fit.resid)
+    residuals.plot()
+    plt.show()
+    residuals.plot(kind='kde')
+    plt.show()
+    print(residuals.describe())
