@@ -154,7 +154,6 @@ def testARMA(s,p,d,q):  #ttrouver un modèle ARIMA pour les données (d = ordre 
     model = ARIMA(s, order=(p,d,q))  
     model_fit = model.fit(disp=0)
     print(model_fit.summary())
-    
     display(Markdown("## Erreurs"))
     print('\n')
     residuals = DataFrame(model_fit.resid)

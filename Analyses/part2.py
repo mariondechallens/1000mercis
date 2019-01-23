@@ -112,12 +112,3 @@ def effet_journalier(df):
 # multiplicative seasonal decomposition
 
 
-"""
-decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='multiplicative')
-decomp.plot();
-plt.show()
-
-decomp = statsmodels.tsa.seasonal.seasonal_decompose(y, model='additive')
-decomp.plot();
-plt.show()
-"""

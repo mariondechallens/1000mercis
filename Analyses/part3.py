@@ -81,33 +81,3 @@ def ts_diagnostics(y, lags=None, title='Taux de conversion', window=5):
     return
 
 
-"""
-# difference time series
-y_diff = np.diff(y)
- 
-# compute time series diagnostics
-ts_diagnostics(y_diff, lags=30)
-adf_test(y_diff)
-
-
-# log transform time series
-y_log = np.log(y)
- 
-# compute time series diagnostics
-ts_diagnostics(y_log, lags=30)
-adf_test(y_log)
-
- #log difference time series
-y_log_diff = np.log(y).diff().dropna()
- 
-# compute time series diagnostics
-ts_diagnostics(y_log_diff, lags=30)
-adf_test(y_log_diff)
-
-# log difference time series *2
-y_log_diff2 = np.log(y).diff().diff(12).dropna()
- 
-# compute time series diagnostics
-ts_diagnostics(y_log_diff2, lags=30)
-adf_test(y_log_diff2)
-"""
