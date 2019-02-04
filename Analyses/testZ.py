@@ -12,9 +12,24 @@ import matplotlib.pyplot as plt
 import statsmodels.stats as sms
 from IPython.display import display, Markdown
 from statsmodels.tsa.arima_model import ARIMA
+import statsmodels.api as sm
+import statsmodels.tsa.stattools as sto
 from pandas import DataFrame
+import seaborn as sns
+
+sns.set_style("white")
 #source: https://towardsdatascience.com/the-math-behind-a-b-testing-with-example-code-part-1-of-2-7be752e1d06f
 
+
+DATA_ALIAS = {
+    'annonceur1/annonceur1_campaign1_visite_2pages.csv': "a1c1",
+    'annonceur1/annonceur1_campaign2_visite_2pages.csv': "a1c2",
+    'annonceur1/annonceur1_campaign3_visite_2pages.csv': "a1c3",
+    'annonceur1/annonceur1_campaign4_visite_2pages.csv': "a1c4",
+    'annonceur2/annonceur2_campaign1_achat.csv': "a2c1achat",
+    'annonceur2/annonceur2_campaign1_visite_page_produit.csv': "a2c1produit",
+    'annonceur2/annonceur2_campaign1_visite_panier.csv': "a2c1panier",
+}
 
 def proportions(data):
     dataA = data.loc[data['group']=="A",:]
@@ -162,3 +177,123 @@ def testARMA(s,p,d,q):  #ttrouver un modèle ARIMA pour les données (d = ordre 
     residuals.plot(kind='kde')
     plt.show()
     print(residuals.describe())
+
+
+def arma_model_selection(series, max_ar=4, max_ma=4):
+    assert not series.isnull().any()
+    order_select = sto.arma_order_select_ic(
+        series.values,
+        ic=['aic', 'bic'],
+        max_ar=max_ar,
+        max_ma=max_ma
+    )
+
+    plt.figure(figsize=(10, 4))
+
+    plt.subplot(1, 2, 1)
+    sns.heatmap(order_select["aic"])
+    plt.xlabel("Ordre MA")
+    plt.ylabel("Ordre AR")
+    plt.title("Résultats AIC")
+
+    plt.subplot(1, 2, 2)
+    sns.heatmap(order_select["bic"])
+    plt.xlabel("Ordre MA")
+    plt.ylabel("Ordre AR")
+    plt.title("Résultats BIC")
+
+    plt.suptitle(f"max_ar={max_ar}, max_ma={max_ma}")
+    plt.show();
+
+    aic_min_order = order_select["aic_min_order"]
+    bic_min_order = order_select["bic_min_order"]
+    print(
+        "AIC meilleur modèle : AR={}, MA={}, AIC={} ".format(
+            aic_min_order[0], aic_min_order[1],
+            order_select['aic'].loc[aic_min_order]
+        )
+    )
+    print(
+        "BIC meilleur modèle : AR={}, MA={}, BIC={} ".format(
+            bic_min_order[0], bic_min_order[1],
+            order_select['bic'].loc[bic_min_order]
+        )
+    )
+
+    return order_select
+
+
+def arma_summary(p, q, y_true):
+    model = ARIMA(y_true, order=(p, 0, q)).fit()
+    print(model.summary())
+    # print(model_fit.summary())
+    display(Markdown("## Erreurs sur la période d'entraînement"))
+    print('\n')
+    residuals = DataFrame(model.resid)
+
+    plt.figure(figsize=(12, 5))
+    plt.subplot(1, 2, 1)
+    residuals.plot(ax=plt.gca())
+    plt.title("Evolution de l'erreur")
+
+    plt.subplot(1, 2, 2)
+    residuals.plot(kind='kde', ax=plt.gca())
+    plt.title("Répartition de l'erreur")
+
+    plt.show()
+
+
+def in_sample_prediction(p, q, y_true, train_ratio):
+    if isinstance(y_true, pd.Series):
+        # on oublie les dates et on regarde que si la position du jour par rapport au debut du test
+        y_true = y_true.values
+        # cela permet d'eviter des problemes comme par ex. l'existence d'un seul NaN au milieu des donnees
+
+    t = round(train_ratio * len(y_true))
+    model = ARIMA(y_true, order=(p, 0, q)).fit()  # on fit avec toutes les donnees
+
+    train_data = y_true[:t]  # on ne fit pas le modele dessus
+
+    pred_start = t
+    pred_end = len(y_true)
+
+    pred_index = np.arange(pred_start + 1, pred_end + 1)
+    dynamic_predictions = model.predict(start=pred_start, end=pred_end - 1, dynamic=True)
+    one_step_ahead_predictions = model.predict(start=pred_start, end=pred_end - 1, dynamic=False)
+
+    plt.figure(figsize=(16, 4))
+    plt.plot(np.arange(1, t + 1), train_data, label="Observed (train)", marker="o", ms=4)
+    plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
+    plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
+    plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
+    plt.legend()
+    plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
+    plt.xlabel("Jour du test")
+    plt.xticks()
+    plt.show()
+
+
+def out_of_sample_prediction(p, q, y_true, train_ratio):
+    t = round(train_ratio * len(y_true))
+    train_data = y_true[:t]
+
+    model = ARIMA(train_data, order=(p, 0, q)).fit()
+
+    pred_start = t
+    pred_end = len(y_true)
+
+    pred_index = np.arange(pred_start + 1, pred_end + 1)
+    dynamic_predictions = model.predict(start=pred_start, end=pred_end - 1, dynamic=True)
+    one_step_ahead_predictions = model.predict(start=pred_start, end=pred_end - 1, dynamic=False)
+    # les predictions dynamiques et one step ahead doivent etre identiques
+    assert all(one_step_ahead_predictions == dynamic_predictions)
+
+    plt.figure(figsize=(16, 4))
+    plt.plot(np.arange(1, t + 1), train_data, label="Observed (train)", marker="o", ms=4)
+    plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
+    plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
+    plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
+
+    plt.legend()
+    plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
+    plt.show()
