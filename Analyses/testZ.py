@@ -273,7 +273,7 @@ def in_sample_prediction(p, q, y_true, train_ratio):
     plt.show()
 
 
-def out_of_sample_prediction(p, q, y_true, train_ratio):
+def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True):
     t = round(train_ratio * len(y_true))
     train_data = y_true[:t]
 
@@ -296,4 +296,11 @@ def out_of_sample_prediction(p, q, y_true, train_ratio):
 
     plt.legend()
     plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
+    
+    if signif == True:
+        for threshold in [0.2, 0.1]:
+            threshold_series = pd.Series(np.full(len(y_true), threshold))
+            plt.plot(threshold_series, label=f"threshold={threshold}")
+  
+    plt.legend()
     plt.show()
