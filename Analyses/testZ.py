@@ -273,7 +273,7 @@ def in_sample_prediction(p, q, y_true, train_ratio):
     plt.show()
 
 
-def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True):
+def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True,graph = True):
     t = round(train_ratio * len(y_true))
     train_data = y_true[:t]
 
@@ -287,20 +287,64 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True):
     one_step_ahead_predictions = model.predict(start=pred_start, end=pred_end - 1, dynamic=False)
     # les predictions dynamiques et one step ahead doivent etre identiques
     assert all(one_step_ahead_predictions == dynamic_predictions)
+    
+    if graph == True:
+        plt.figure(figsize=(16, 4))
+        plt.plot(np.arange(1, t + 1), train_data, label="Observed (train)", marker="o", ms=4)
+        plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
+        plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
+        #plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
+
+        plt.legend()
+        plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
+    
+        if signif == True:
+            for threshold in [0.2, 0.1]:
+                threshold_series = pd.Series(np.full(len(y_true), threshold))
+                plt.plot(threshold_series, label=f"threshold={threshold}")
+        ## combien de fois on dépasse le seuil?
+                print('Dépassement de la vraie série du seuil ( = significatif) à',threshold)
+                print(sum(y_true[t:]<threshold))
+                print('Dépassement de la prédiction dynamique du seuil ( = significatif) à',threshold)
+                print(sum(dynamic_predictions<threshold))
+                #print('Dépassement de la prédiction 1-pas du seuil ( = significatif) à',threshold)
+                #print(sum(one_step_ahead_predictions<threshold))
+                plt.legend()
+        plt.show()
+    return dynamic_predictions, one_step_ahead_predictions
+
+
+def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
+    
+    pred_Z = []
+    pred_Z.append(out_of_sample_prediction(p=p, q=q, y_true=z_true, train_ratio=train_ratio,signif= False,graph=False))
+    # pred_Z contient les predictions dyn et 1-pas pour le ratio donné
+    
+    t = round(train_ratio * len(p_true))
+    pred_start = t
+    pred_end = len(p_true)
+    pred_index = np.arange(pred_start + 1, pred_end + 1)
+    
+    P_rej_Z_dyn = pd.Series(2 * (1 - st.norm.cdf(pred_Z[0][0].abs())), index=p_true[t:].index, name='P_rej_Z_dyn')
+    #P_rej_Z_1pas = pd.Series(2 * (1 - st.norm.cdf(pred_Z[0][1].abs())), index=p_true[t:].index, name='P_rej_Z_1pas')
 
     plt.figure(figsize=(16, 4))
-    plt.plot(np.arange(1, t + 1), train_data, label="Observed (train)", marker="o", ms=4)
-    plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
-    plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
-    plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
+    plt.plot(np.arange(1, t + 1), p_true[:t], label="Observed (train)", marker="o", ms=4)
+    plt.plot(pred_index, p_true[t:], label="Test period (truth)", marker="o", ms=4)
+    plt.plot(pred_index, P_rej_Z_dyn, label="Dynamic pred of P_rej ", marker="o", ms=4)
+    #plt.plot(pred_index, P_rej_Z_1pas, label="1-step pred of P_rej", marker="o", ms=4)
 
     plt.legend()
-    plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
+    plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction de P_rej pour AR={p} MA={q} sur Z_cum")
     
     if signif == True:
         for threshold in [0.2, 0.1]:
-            threshold_series = pd.Series(np.full(len(y_true), threshold))
+            threshold_series = pd.Series(np.full(len(p_true), threshold))
             plt.plot(threshold_series, label=f"threshold={threshold}")
-  
-    plt.legend()
+            print('Dépassement de la vraie série du seuil ( = significatif) à',threshold)
+            print(sum(p_true[t:]<threshold))
+            print('Dépassement de la prédiction dynamique du seuil ( = significatif) à',threshold)
+            print(sum(P_rej_Z_dyn<threshold))
+            plt.legend()
     plt.show()
+    
