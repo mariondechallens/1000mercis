@@ -294,6 +294,12 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True,graph = Tr
         plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
         plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
         #plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
+       
+        # intervalle d'erreur à 95%
+        stdev = np.sqrt(sum((np.array(dynamic_predictions) - np.array(y_true[t:]))**2) / (len(y_true[t:]) - 2))
+        pred_out_ci =  [dynamic_predictions - 1.96*stdev/np.sqrt(len(y_true[t:])), dynamic_predictions + 1.96*stdev/np.sqrt(len(y_true[t:]))]
+        plt.fill_between(pred_index,pred_out_ci[0],pred_out_ci[1], color='#ff0066', alpha=.25)
+
 
         plt.legend()
         plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
@@ -307,8 +313,6 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True,graph = Tr
                 print(sum(y_true[t:]<threshold))
                 print('Dépassement de la prédiction dynamique du seuil ( = significatif) à',threshold)
                 print(sum(dynamic_predictions<threshold))
-                #print('Dépassement de la prédiction 1-pas du seuil ( = significatif) à',threshold)
-                #print(sum(one_step_ahead_predictions<threshold))
                 plt.legend()
         plt.show()
     return dynamic_predictions, one_step_ahead_predictions
@@ -332,7 +336,11 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     plt.plot(np.arange(1, t + 1), p_true[:t], label="Observed (train)", marker="o", ms=4)
     plt.plot(pred_index, p_true[t:], label="Test period (truth)", marker="o", ms=4)
     plt.plot(pred_index, P_rej_Z_dyn, label="Dynamic pred of P_rej ", marker="o", ms=4)
-    #plt.plot(pred_index, P_rej_Z_1pas, label="1-step pred of P_rej", marker="o", ms=4)
+    
+    # intervalle d'erreur à 95%
+    stdev = np.sqrt(sum((np.array(P_rej_Z_dyn) - np.array(p_true[t:]))**2) / (len(p_true[t:]) - 2))
+    pred_out_ci =  [P_rej_Z_dyn - 1.96*stdev/np.sqrt(len(p_true[t:])), P_rej_Z_dyn + 1.96*stdev/np.sqrt(len(p_true[t:]))]
+    plt.fill_between(pred_index,pred_out_ci[0],pred_out_ci[1], color='#ff0066', alpha=.25)
 
     plt.legend()
     plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction de P_rej pour AR={p} MA={q} sur Z_cum")
