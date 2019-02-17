@@ -355,4 +355,25 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
             print(sum(P_rej_Z_dyn<threshold))
             plt.legend()
     plt.show()
-    
+
+def arma_select_mse(y,max_ar = 2,max_ma=2,d=0):
+    MSE = np.zeros((max_ar +1,max_ma +1) )
+    for p in range(max_ar + 1):
+        for q in range(max_ma + 1):
+            try :
+                md = ARIMA(y, order=(p, d, q)).fit()
+                MSE[p,q] = sum(np.array(md.resid)**2)
+            except:
+                MSE[p,q] = float('Inf')
+                continue  #not raising exceptions if non invertible or non causal models
+            
+    mse_min_order = MSE.argmin()//MSE.shape[1], MSE.argmin()%MSE.shape[1] 
+    return mse_min_order
+
+
+
+
+
+
+
+
