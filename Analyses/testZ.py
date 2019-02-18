@@ -299,12 +299,7 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
         plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
         plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
         # plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
-       
-        # intervalle d'erreur à 95%
-        stdev = np.sqrt(sum((np.array(dynamic_predictions) - np.array(y_true[t:]))**2) / (len(y_true[t:]) - 2))
-        pred_out_ci =  [dynamic_predictions - 1.96*stdev/np.sqrt(len(y_true[t:])), dynamic_predictions + 1.96*stdev/np.sqrt(len(y_true[t:]))]
-        plt.fill_between(pred_index,pred_out_ci[0],pred_out_ci[1], color='#ff0066', alpha=.25)
-
+      
         # Intervalle de confiance au seuil 1-alpha
         plt.fill_between(pred_index, conf_int[:, 0], conf_int[:, 1], color='blue', alpha=0.25)
 
@@ -322,33 +317,31 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
                 print(sum(dynamic_predictions<threshold))
                 plt.legend()
         plt.show()
-    return dynamic_predictions, one_step_ahead_predictions
+    return forecast, conf_int
 
 
 def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     
-    pred_Z = []
-    pred_Z.append(out_of_sample_prediction(p=p, q=q, y_true=z_true, train_ratio=train_ratio,signif= False,graph=False))
-    # pred_Z contient les predictions dyn et 1-pas pour le ratio donné
+    forecast, conf_int = out_of_sample_prediction(p=p, q=q, y_true=z_true, train_ratio=train_ratio,signif= False,graph=False)
     
     t = round(train_ratio * len(p_true))
     pred_start = t
     pred_end = len(p_true)
     pred_index = np.arange(pred_start + 1, pred_end + 1)
     
-    P_rej_Z_dyn = pd.Series(2 * (1 - st.norm.cdf(pred_Z[0][0].abs())), index=p_true[t:].index, name='P_rej_Z_dyn')
-    #P_rej_Z_1pas = pd.Series(2 * (1 - st.norm.cdf(pred_Z[0][1].abs())), index=p_true[t:].index, name='P_rej_Z_1pas')
+    P_rej_Z_dyn = pd.Series(2 * (1 - st.norm.cdf(abs(forecast))), index=p_true[t:].index, name='P_rej_Z_dyn')
+    
+    #propagation du CI de Z sur P
+    upper = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,1]))), index=p_true[t:].index, name='upper_bound_CI')
+    lower = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,0]))), index=p_true[t:].index, name='lower_bound_CI')
 
     plt.figure(figsize=(16, 4))
     plt.plot(np.arange(1, t + 1), p_true[:t], label="Observed (train)", marker="o", ms=4)
     plt.plot(pred_index, p_true[t:], label="Test period (truth)", marker="o", ms=4)
     plt.plot(pred_index, P_rej_Z_dyn, label="Dynamic pred of P_rej ", marker="o", ms=4)
     
-    # intervalle d'erreur à 95%
-    stdev = np.sqrt(sum((np.array(P_rej_Z_dyn) - np.array(p_true[t:]))**2) / (len(p_true[t:]) - 2))
-    pred_out_ci =  [P_rej_Z_dyn - 1.96*stdev/np.sqrt(len(p_true[t:])), P_rej_Z_dyn + 1.96*stdev/np.sqrt(len(p_true[t:]))]
-    plt.fill_between(pred_index,pred_out_ci[0],pred_out_ci[1], color='#ff0066', alpha=.25)
-
+    plt.fill_between(pred_index, lower, upper, color='blue', alpha=0.25)
+    
     plt.legend()
     plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction de P_rej pour AR={p} MA={q} sur Z_cum")
     
@@ -378,7 +371,53 @@ def arma_select_mse(y,max_ar = 2,max_ma=2,d = 0):
     return mse_min_order
 
 
+def comparaison_model(aic_min_order,bic_min_order,mse_min_order,y):
+    for i in range(1):
+        try :
+            model_aic = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(aic_min_order[0], 0, aic_min_order[1]), freq="D").fit()
+        except:
+            model_aic = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(0, 0, 0), freq="D").fit()
+            print('AIC model not computed - do not take the values into account')
+            continue
+    for i in range(1):
+        try:
+            model_bic = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(bic_min_order[0], 0, bic_min_order[1]), freq="D").fit()
+        except:
+            model_bic = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(0, 0, 0), freq="D").fit()
+            print('BIC model not computed - do not take the values into account')
+            continue
+    for i in range(1):
+        try:
+            model_mse = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(mse_min_order[0], 0, mse_min_order[1]), freq="D").fit()
+        except:
+            model_mse = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(0, 0, 0), freq="D").fit()
+            print('MSE model not computed - do not take the values into account')
+            continue
+        
+    MSE = [sum(model_aic.resid**2),sum(model_bic.resid**2),sum(model_mse.resid**2)]
+    AIC = [model_aic.aic,model_bic.aic,model_mse.aic]
+    BIC = [model_aic.bic,model_bic.bic, model_mse.bic]
+    
+    print('MSE best model :',mse_min_order)
+    print('AIC best model :',aic_min_order)
+    print('BIC best model :',bic_min_order)
+    
+    plt.bar([0,1,2],MSE)
+    plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
+    plt.title('MSE')
+    plt.show()
 
+    plt.bar([0,1,2],AIC,color = 'g')
+    plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
+    plt.title('AIC')
+    plt.show()
+
+    plt.bar([0,1,2],BIC, color = 'r')
+    plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
+    plt.title('BIC')
+    plt.show()
+
+        
 
 
 
