@@ -273,7 +273,7 @@ def in_sample_prediction(p, q, y_true, train_ratio):
     plt.show()
 
 
-def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True,graph = True):
+def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True, alpha=0.05):
     t = round(train_ratio * len(y_true))
     train_data = y_true[:t]
 
@@ -287,19 +287,26 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True,graph = Tr
     one_step_ahead_predictions = model.predict(start=pred_start, end=pred_end - 1, dynamic=False)
     # les predictions dynamiques et one step ahead doivent etre identiques
     assert all(one_step_ahead_predictions == dynamic_predictions)
-    
+
+    # en fait maintenant on pourra enlever dynamic pred / one_step_pred
+    # ca donne le meme resultat que forecast sans les intervalles de confiance
+    forecast, stderr, conf_int = model.forecast(pred_end - pred_start, alpha=alpha)
+    assert all(dynamic_predictions == forecast)
+
     if graph == True:
         plt.figure(figsize=(16, 4))
         plt.plot(np.arange(1, t + 1), train_data, label="Observed (train)", marker="o", ms=4)
         plt.plot(pred_index, y_true[t:], label="Test period (truth)", marker="o", ms=4)
         plt.plot(pred_index, dynamic_predictions, label="Dynamic pred", marker="o", ms=4)
-        #plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
+        # plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
        
         # intervalle d'erreur à 95%
         stdev = np.sqrt(sum((np.array(dynamic_predictions) - np.array(y_true[t:]))**2) / (len(y_true[t:]) - 2))
         pred_out_ci =  [dynamic_predictions - 1.96*stdev/np.sqrt(len(y_true[t:])), dynamic_predictions + 1.96*stdev/np.sqrt(len(y_true[t:]))]
         plt.fill_between(pred_index,pred_out_ci[0],pred_out_ci[1], color='#ff0066', alpha=.25)
 
+        # Intervalle de confiance au seuil 1-alpha
+        plt.fill_between(pred_index, conf_int[:, 0], conf_int[:, 1], color='blue', alpha=0.25)
 
         plt.legend()
         plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
@@ -308,7 +315,7 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif = True,graph = Tr
             for threshold in [0.2, 0.1]:
                 threshold_series = pd.Series(np.full(len(y_true), threshold))
                 plt.plot(threshold_series, label=f"threshold={threshold}")
-        ## combien de fois on dépasse le seuil?
+                # combien de fois on dépasse le seuil?
                 print('Dépassement de la vraie série du seuil ( = significatif) à',threshold)
                 print(sum(y_true[t:]<threshold))
                 print('Dépassement de la prédiction dynamique du seuil ( = significatif) à',threshold)
