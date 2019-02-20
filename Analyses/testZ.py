@@ -292,7 +292,10 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
     # ca donne le meme resultat que forecast sans les intervalles de confiance
     forecast, stderr, conf_int = model.forecast(pred_end - pred_start, alpha=alpha)
     assert all(dynamic_predictions == forecast)
-
+    
+    erreur_pred = sum((forecast - y_true[t:])**2)
+    print('Erreur de prédiction (MSE) :',erreur_pred)
+    
     if graph == True:
         plt.figure(figsize=(16, 4))
         plt.plot(np.arange(1, t + 1), train_data, label="Observed (train)", marker="o", ms=4)
@@ -317,12 +320,12 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
                 print(sum(dynamic_predictions<threshold))
                 plt.legend()
         plt.show()
-    return forecast, conf_int
+    return forecast, conf_int, erreur_pred
 
 
 def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     
-    forecast, conf_int = out_of_sample_prediction(p=p, q=q, y_true=z_true, train_ratio=train_ratio,signif= False,graph=False)
+    forecast, conf_int, erreur_pred = out_of_sample_prediction(p=p, q=q, y_true=z_true, train_ratio=train_ratio,signif= False,graph=False)
     
     t = round(train_ratio * len(p_true))
     pred_start = t
@@ -334,6 +337,9 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     #propagation du CI de Z sur P
     upper = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,1]))), index=p_true[t:].index, name='upper_bound_CI')
     lower = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,0]))), index=p_true[t:].index, name='lower_bound_CI')
+    
+    erreur_pred = sum((P_rej_Z_dyn - p_true[t:])**2)
+    print('Erreur de prédiction sur P_rej (MSE) :',erreur_pred)
 
     plt.figure(figsize=(16, 4))
     plt.plot(np.arange(1, t + 1), p_true[:t], label="Observed (train)", marker="o", ms=4)
@@ -355,6 +361,7 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
             print(sum(P_rej_Z_dyn<threshold))
             plt.legend()
     plt.show()
+    return erreur_pred
 
 def arma_select_mse(y,max_ar = 2,max_ma=2,d = 0):
     MSE = np.zeros((max_ar +1,max_ma +1) )
@@ -371,7 +378,7 @@ def arma_select_mse(y,max_ar = 2,max_ma=2,d = 0):
     return mse_min_order
 
 
-def comparaison_model(aic_min_order,bic_min_order,mse_min_order,y):
+def comparaison_model(aic_min_order,bic_min_order,mse_min_order,y,plot=True):
     for i in range(1):
         try :
             model_aic = ARIMA(y.asfreq("D").fillna(method="ffill"), order=(aic_min_order[0], 0, aic_min_order[1]), freq="D").fit()
@@ -402,20 +409,23 @@ def comparaison_model(aic_min_order,bic_min_order,mse_min_order,y):
     print('AIC best model :',aic_min_order)
     print('BIC best model :',bic_min_order)
     
-    plt.bar([0,1,2],MSE)
-    plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
-    plt.title('MSE')
-    plt.show()
+    if plot == True :
+        plt.bar([0,1,2],MSE)
+        plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
+        plt.title('MSE')
+        plt.show()
 
-    plt.bar([0,1,2],AIC,color = 'g')
-    plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
-    plt.title('AIC')
-    plt.show()
+        plt.bar([0,1,2],AIC,color = 'g')
+        plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
+        plt.title('AIC')
+        plt.show()
 
-    plt.bar([0,1,2],BIC, color = 'r')
-    plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
-    plt.title('BIC')
-    plt.show()
+        plt.bar([0,1,2],BIC, color = 'r')
+        plt.xticks([0,1,2], ['aic_best_mod','bic_best_mod','mse_best_mod'])
+        plt.title('BIC')
+        plt.show()
+    
+    return MSE, AIC, BIC
 
         
 
