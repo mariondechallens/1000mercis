@@ -293,7 +293,7 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
     forecast, stderr, conf_int = model.forecast(pred_end - pred_start, alpha=alpha)
     assert all(dynamic_predictions == forecast)
     
-    erreur_pred = sum((forecast - y_true[t:])**2)
+    erreur_pred = sum((forecast - y_true[t:])**2)/len(y_true[t:])
     print('Erreur de prédiction (MSE) :',erreur_pred)
     
     if graph == True:
@@ -338,7 +338,7 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     upper = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,1]))), index=p_true[t:].index, name='upper_bound_CI')
     lower = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,0]))), index=p_true[t:].index, name='lower_bound_CI')
     
-    erreur_pred = sum((P_rej_Z_dyn - p_true[t:])**2)
+    erreur_pred = sum((P_rej_Z_dyn - p_true[t:])**2)/len(p_true[t:])
     print('Erreur de prédiction sur P_rej (MSE) :',erreur_pred)
 
     plt.figure(figsize=(16, 4))
@@ -369,7 +369,7 @@ def arma_select_mse(y,max_ar = 2,max_ma=2,d = 0):
         for q in range(max_ma + 1):
             try :
                 md = ARIMA(y, order=(p, d, q)).fit()
-                MSE[p,q] = sum(np.array(md.resid)**2)
+                MSE[p,q] = sum(np.array(md.resid)**2)/len(y)
             except:
                 MSE[p,q] = float('Inf')
                 continue  #not raising exceptions if non invertible or non causal models
@@ -401,7 +401,7 @@ def comparaison_model(aic_min_order,bic_min_order,mse_min_order,y,plot=True):
             print('MSE model not computed - do not take the values into account')
             continue
         
-    MSE = [sum(model_aic.resid**2),sum(model_bic.resid**2),sum(model_mse.resid**2)]
+    MSE = [sum(model_aic.resid**2)/len(y),sum(model_bic.resid**2)/len(y),sum(model_mse.resid**2)/len(y)]
     AIC = [model_aic.aic,model_bic.aic,model_mse.aic]
     BIC = [model_aic.bic,model_bic.bic, model_mse.bic]
     
