@@ -29,6 +29,13 @@ DATA_ALIAS = {
     'annonceur2/annonceur2_campaign1_achat.csv': "a2c1achat",
     'annonceur2/annonceur2_campaign1_visite_page_produit.csv': "a2c1produit",
     'annonceur2/annonceur2_campaign1_visite_panier.csv': "a2c1panier",
+    'annonceur1_campaign1_visite_2pages': "a1c1",
+    'annonceur1_campaign2_visite_2pages': "a1c2",
+    'annonceur1_campaign3_visite_2pages': "a1c3",
+    'annonceur1_campaign4_visite_2pages': "a1c4",
+    'annonceur2_campaign1_achat': "a2c1achat",
+    'annonceur2_campaign1_visite_page_produit': "a2c1produit",
+    'annonceur2_campaign1_visite_panier': "a2c1panier",
 }
 
 def proportions(data):
