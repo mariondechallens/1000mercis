@@ -302,6 +302,9 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
     
     erreur_pred = sum((forecast - y_true[t:])**2)/len(y_true[t:])
     print('Erreur de prédiction (MSE) :',erreur_pred)
+
+    #upper = pd.Series(forecast + 1.96*np.sqrt(erreur_pred), index=y_true[t:].index, name='upper_bound_CI')
+    #lower = pd.Series(forecast - 1.96*np.sqrt(erreur_pred), index=y_true[t:].index, name='lower_bound_CI')
     
     if graph == True:
         plt.figure(figsize=(16, 4))
@@ -312,6 +315,7 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
       
         # Intervalle de confiance au seuil 1-alpha
         plt.fill_between(pred_index, conf_int[:, 0], conf_int[:, 1], color='blue', alpha=0.25)
+        #plt.fill_between(pred_index, lower, upper, color='blue', alpha=0.25)
 
         plt.legend()
         plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
@@ -341,13 +345,13 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     
     P_rej_Z_dyn = pd.Series(2 * (1 - st.norm.cdf(abs(forecast))), index=p_true[t:].index, name='P_rej_Z_dyn')
     
-    #propagation du CI de Z sur P
-    upper = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,1]))), index=p_true[t:].index, name='upper_bound_CI')
-    lower = pd.Series(2 * (1 - st.norm.cdf(abs(conf_int[:,0]))), index=p_true[t:].index, name='lower_bound_CI')
-    
     erreur_pred = sum((P_rej_Z_dyn - p_true[t:])**2)/len(p_true[t:])
     print('Erreur de prédiction sur P_rej (MSE) :',erreur_pred)
 
+    upper = pd.Series(P_rej_Z_dyn + 1.96*np.sqrt(erreur_pred), index=p_true[t:].index, name='upper_bound_CI')
+    lower = pd.Series(P_rej_Z_dyn - 1.96*np.sqrt(erreur_pred), index=p_true[t:].index, name='lower_bound_CI')
+    
+ 
     plt.figure(figsize=(16, 4))
     plt.plot(np.arange(1, t + 1), p_true[:t], label="Observed (train)", marker="o", ms=4)
     plt.plot(pred_index, p_true[t:], label="Test period (truth)", marker="o", ms=4)
