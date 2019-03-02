@@ -314,8 +314,8 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
         # plt.plot(pred_index, one_step_ahead_predictions, label="1-step pred", marker="o", ms=4)
       
         # Intervalle de confiance au seuil 1-alpha
-        #plt.fill_between(pred_index, conf_int[:, 0], conf_int[:, 1], color='blue', alpha=0.25)
-        plt.fill_between(pred_index, lower, upper, color='blue', alpha=0.25)
+        plt.fill_between(pred_index, conf_int[:, 0], conf_int[:, 1], color='blue', alpha=0.25)
+        #plt.fill_between(pred_index, lower, upper, color='blue', alpha=0.25)
 
         plt.legend()
         plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
