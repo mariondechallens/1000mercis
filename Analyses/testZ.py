@@ -38,6 +38,18 @@ DATA_ALIAS = {
     'annonceur2_campaign1_visite_panier': "a2c1panier",
 }
 
+THRESHOLD_Z = {
+    0.2: [st.norm.ppf(1 - 0.2 / 2), -st.norm.ppf(1 - 0.2 / 2)],
+    0.1: [st.norm.ppf(1 - 0.1 / 2), -st.norm.ppf(1 - 0.1 / 2)],
+}
+
+
+THRESHOLD_Z_COLOR = {
+    0.2: "black",
+    0.1: "grey"
+}
+
+
 def proportions(data):
     dataA = data.loc[data['group']=="A",:]
     dataB = data.loc[data['group']=="B",:]
@@ -280,7 +292,7 @@ def in_sample_prediction(p, q, y_true, train_ratio):
     plt.show()
 
 
-def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True, alpha=0.05):
+def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, signifZ=False, graph=True, alpha=0.05):
     t = round(train_ratio * len(y_true))
     train_data = y_true[:t]
 
@@ -315,7 +327,8 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
 
         plt.legend()
         plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction pour AR={p} MA={q}")
-    
+
+        # seuils sur p
         if signif == True:
             for threshold in [0.2, 0.1]:
                 threshold_series = pd.Series(np.full(len(y_true), threshold))
@@ -324,7 +337,19 @@ def out_of_sample_prediction(p, q, y_true, train_ratio, signif=True, graph=True,
                 print('Dépassement de la vraie série du seuil ( = significatif) à',threshold)
                 print(sum(y_true[t:]<threshold))
                 print('Dépassement de la prédiction dynamique du seuil ( = significatif) à',threshold)
-                print(sum(dynamic_predictions<threshold))
+                print(sum(forecast<threshold))
+                plt.legend()
+
+        # seuils sur z (ne peut pas etre active en meme temps que seuils sur p)
+        elif signifZ == True:
+
+            for threshold, Z_value_list in THRESHOLD_Z.items():
+                for Z_value in Z_value_list:
+                    threshold_series = pd.Series(np.full(len(y_true), Z_value))
+                    if Z_value >= 0:
+                        plt.plot(threshold_series, label=f"threshold={threshold}", color=THRESHOLD_Z_COLOR[threshold])
+                    else:
+                        plt.plot(threshold_series, color=THRESHOLD_Z_COLOR[threshold])
                 plt.legend()
         plt.show()
     return forecast, conf_int, erreur_pred
