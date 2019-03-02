@@ -342,11 +342,27 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     pred_start = t
     pred_end = len(p_true)
     pred_index = np.arange(pred_start + 1, pred_end + 1)
-    
+
     P_rej_Z_dyn = pd.Series(2 * (1 - st.norm.cdf(abs(forecast))), index=p_true[t:].index, name='P_rej_Z_dyn')
     
     erreur_pred = sum((P_rej_Z_dyn - p_true[t:])**2)/len(p_true[t:])
     print('Erreur de prédiction sur P_rej (MSE) :',erreur_pred)
+
+    upper_from_confint = pd.Series([0] * len(forecast), index=p_true[t:].index, name='upper_bound_CI')
+    lower_from_confint = pd.Series([0] * len(forecast), index=p_true[t:].index, name='lower_bound_CI')
+
+    for i in range(len(forecast)):
+        lower_bound = conf_int[i][0]
+        upper_bound = conf_int[i][1]
+        if lower_bound >= 0:  # bornes de l'IC pour Z sont positives
+            lower_from_confint[i] = 2*(1 - st.norm.cdf(abs(upper_bound)))
+            upper_from_confint[i] = 2*(1 - st.norm.cdf(abs(lower_bound)))
+        elif upper_bound <= 0:  # bornes de l'IC pour Z sont négatives
+            lower_from_confint[i] = 2*(1 - st.norm.cdf(abs(lower_bound)))
+            upper_from_confint[i] = 2*(1 - st.norm.cdf(abs(upper_bound)))
+        elif lower_bound <= 0 <= upper_bound:  # bornes de part et d'autre de 0 = peu de confiance sur Z et donc sur p
+            lower_from_confint[i] = 2*(1 - st.norm.cdf(max(abs(lower_bound), abs(upper_bound))))
+            upper_from_confint[i] = 1.0
 
     upper = pd.Series(P_rej_Z_dyn + 1.96*stderr, index=p_true[t:].index, name='upper_bound_CI')
     lower = pd.Series(P_rej_Z_dyn - 1.96*stderr, index=p_true[t:].index, name='lower_bound_CI')
@@ -357,7 +373,7 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
     plt.plot(pred_index, p_true[t:], label="Test period (truth)", marker="o", ms=4)
     plt.plot(pred_index, P_rej_Z_dyn, label="Dynamic pred of P_rej ", marker="o", ms=4)
     
-    plt.fill_between(pred_index, lower, upper, color='blue', alpha=0.25)
+    plt.fill_between(pred_index, lower_from_confint, upper_from_confint, color='blue', alpha=0.25)
     
     plt.legend()
     plt.title(f"[train_ratio={train_ratio}] Resultats de prédiction de P_rej pour AR={p} MA={q} sur Z_cum")
