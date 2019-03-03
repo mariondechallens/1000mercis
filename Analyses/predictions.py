@@ -52,7 +52,7 @@ def get_values(train_ratio,aic_min_order,bic_min_order,mse_min_order,y,plot = Fa
         
     return aic_val, bic_val, mse_val
 
-def get_predictions(train_ratio,y,aic_min_order,bic_min_order,mse_min_order,plot=False,signif =False):
+def get_predictions(train_ratio,y,aic_min_order,bic_min_order,mse_min_order,plot=False,signif =False,signifZ = False):
     err_aic = []
     err_bic = []
     err_mse = []
@@ -61,17 +61,17 @@ def get_predictions(train_ratio,y,aic_min_order,bic_min_order,mse_min_order,plot
     
         print('MODEL AIC')
         (p,q) = aic_min_order[i]
-        f,ci,e,s = out_of_sample_prediction(p=p, q=q, y_true=y, train_ratio=train_ratio[i],signif= signif)
+        f,ci,e,s = out_of_sample_prediction(p=p, q=q, y_true=y, train_ratio=train_ratio[i],signif= signif,signifZ = signifZ)
         err_aic.append(e)
     
         print('MODEL BIC')
         (p,q) = bic_min_order[i]
-        f,ci,e,s = out_of_sample_prediction(p=p, q=q, y_true=y, train_ratio=train_ratio[i],signif= signif)
+        f,ci,e,s = out_of_sample_prediction(p=p, q=q, y_true=y, train_ratio=train_ratio[i],signif= signif,signifZ = signifZ)
         err_bic.append(e)
     
         print('MODEL MSE')
         (p,q) = mse_min_order[i]
-        f,ci,e,s = out_of_sample_prediction(p=p, q=q, y_true=y, train_ratio=train_ratio[i],signif= signif)
+        f,ci,e,s = out_of_sample_prediction(p=p, q=q, y_true=y, train_ratio=train_ratio[i],signif= signif,signifZ = signifZ)
         err_mse.append(e)
      
     if plot == True:
