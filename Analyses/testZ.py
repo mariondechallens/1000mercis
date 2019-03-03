@@ -380,14 +380,14 @@ def p_with_fit_of_z(p,q,z_true ,p_true, train_ratio, signif = True):
         lower_bound = conf_int[i][0]
         upper_bound = conf_int[i][1]
         if lower_bound >= 0:  # bornes de l'IC pour Z sont positives
-            lower_from_confint[i] = 2*(1 - st.norm.cdf(abs(upper_bound)))
-            upper_from_confint[i] = 2*(1 - st.norm.cdf(abs(lower_bound)))
+            lower_from_confint.iloc[i] = 2*(1 - st.norm.cdf(abs(upper_bound)))
+            upper_from_confint.iloc[i] = 2*(1 - st.norm.cdf(abs(lower_bound)))
         elif upper_bound <= 0:  # bornes de l'IC pour Z sont négatives
-            lower_from_confint[i] = 2*(1 - st.norm.cdf(abs(lower_bound)))
-            upper_from_confint[i] = 2*(1 - st.norm.cdf(abs(upper_bound)))
+            lower_from_confint.iloc[i] = 2*(1 - st.norm.cdf(abs(lower_bound)))
+            upper_from_confint.iloc[i] = 2*(1 - st.norm.cdf(abs(upper_bound)))
         elif lower_bound <= 0 <= upper_bound:  # bornes de part et d'autre de 0 = peu de confiance sur Z et donc sur p
-            lower_from_confint[i] = 2*(1 - st.norm.cdf(max(abs(lower_bound), abs(upper_bound))))
-            upper_from_confint[i] = 1.0
+            lower_from_confint.iloc[i] = 2*(1 - st.norm.cdf(max(abs(lower_bound), abs(upper_bound))))
+            upper_from_confint.iloc[i] = 1.0
 
     upper = pd.Series(P_rej_Z_dyn + 1.96*stderr, index=p_true[t:].index, name='upper_bound_CI')
     lower = pd.Series(P_rej_Z_dyn - 1.96*stderr, index=p_true[t:].index, name='lower_bound_CI')
